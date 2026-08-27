@@ -1,20 +1,47 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# MCS Rainwater Harvesting Dashboard
 
-# Run and deploy your AI Studio app
+Interactive decision-support dashboard for synthetic rainfall generation, roof-harvest estimation, and rainwater storage sizing for school facilities.
 
-This contains everything you need to run your app locally.
+## Stack
 
-View your app in AI Studio: https://ai.studio/apps/drive/1AQsLE7e9_Mbr19jUAXxKn_Q2GyCnor-O
+- React 19
+- TypeScript
+- Vite
+- Recharts
+
+## Features
+
+- Calibrate monthly rainfall parameters from uploaded historical daily CSV data
+- Generate synthetic multi-year rainfall sequences with the semi-Markov rainfall engine
+- Configure school buildings, catchment assumptions, and water-demand inputs
+- Run water-balance analysis across tank-size ranges and branded storage options
+- Import and export simulation reports as JSON
+
+## Project Structure
+
+- [App.tsx](/c:/Users/Teacher/OneDrive%20-%20Leon%20National%20High%20School/WEB%20APP%20DEVELOPMENT/rainwater-harvesting/App.tsx): main dashboard composition
+- `components/`: UI modules and visualizations
+- `hooks/`: non-visual app state orchestration
+- `services/`: rainfall generation, inflow, water-balance, and analysis engines
+- `utils/`: shared parsing, validation, and reporting helpers
+- `tests/`: engine and analysis regression tests
 
 ## Run Locally
 
-**Prerequisites:**  Node.js
+1. Install dependencies with `npm install`
+2. Start the app with `npm run dev`
 
+## Quality Checks
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+- Type check: `npm run typecheck`
+- Run tests: `npm run test`
+- Production build: `npm run build`
+
+## Data Expectations
+
+Historical calibration uploads should include at least:
+
+- `Date`
+- `Rain` or `Rain_mm`
+
+Imported/exported reports use the project JSON schema defined in [types.ts](/c:/Users/Teacher/OneDrive%20-%20Leon%20National%20High%20School/WEB%20APP%20DEVELOPMENT/rainwater-harvesting/types.ts).

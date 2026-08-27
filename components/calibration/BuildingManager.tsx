@@ -1,7 +1,8 @@
-
+﻿
 import React from 'react';
 import { Building2, Plus, Trash2, Layout, Maximize } from 'lucide-react';
 import { Building, InflowConfig } from '../../types';
+import { parseIntegerInput } from '../../utils/input';
 
 interface Props {
   config: InflowConfig;
@@ -52,7 +53,7 @@ const BuildingManager: React.FC<Props> = ({ config, onChange }) => {
       <div className="flex items-center justify-between border-b border-slate-100 pb-2">
         <div className="flex items-center gap-2">
           <Building2 size={16} className="text-primary" />
-          <h4 className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">Catchment Infrastructure</h4>
+          <h4 className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">Buildings and Roofs</h4>
         </div>
         <button 
           onClick={handleAddBuilding}
@@ -96,19 +97,19 @@ const BuildingManager: React.FC<Props> = ({ config, onChange }) => {
                     min="1"
                     className="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all" 
                     value={building.numberOfClassrooms} 
-                    onChange={(e) => handleUpdateBuilding(building.id, { numberOfClassrooms: parseInt(e.target.value) || 0 })} 
+                    onChange={(e) => handleUpdateBuilding(building.id, { numberOfClassrooms: parseIntegerInput(e.target.value, building.numberOfClassrooms, 1) })} 
                   />
                 </div>
               </div>
               <div className="space-y-1">
-                <label className="block text-[9px] font-black text-slate-400 uppercase">Area / Room (m²)</label>
+                <label className="block text-[9px] font-black text-slate-400 uppercase">Roof Area per Room (m2)</label>
                 <div className="relative">
                   <input 
                     type="number" 
                     min="1"
                     className="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all" 
                     value={building.roofAreaPerClassroom} 
-                    onChange={(e) => handleUpdateBuilding(building.id, { roofAreaPerClassroom: parseInt(e.target.value) || 0 })} 
+                    onChange={(e) => handleUpdateBuilding(building.id, { roofAreaPerClassroom: parseIntegerInput(e.target.value, building.roofAreaPerClassroom, 1) })} 
                   />
                 </div>
               </div>
@@ -117,10 +118,10 @@ const BuildingManager: React.FC<Props> = ({ config, onChange }) => {
             <div className="mt-3 pt-3 border-t border-slate-50 flex justify-between items-center">
               <div className="flex items-center gap-1 text-[10px] text-slate-500">
                 <Maximize size={10} />
-                <span>Building Footprint</span>
+                <span>Total Roof Area</span>
               </div>
               <span className="text-xs font-black text-primary bg-primary/5 px-2 py-0.5 rounded">
-                {formatNumber(building.numberOfClassrooms * building.roofAreaPerClassroom)} m²
+                {formatNumber(building.numberOfClassrooms * building.roofAreaPerClassroom)} m2
               </span>
             </div>
           </div>
@@ -131,3 +132,4 @@ const BuildingManager: React.FC<Props> = ({ config, onChange }) => {
 };
 
 export default BuildingManager;
+

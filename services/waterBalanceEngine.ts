@@ -1,53 +1,74 @@
-
 import { RainfallDataRow, InflowConfig, WaterBalanceConfig, ReliabilityResult } from '../types';
+
+const getInitialStorage = (config: WaterBalanceConfig): number => {
+  switch (config.initialStorageMode) {
+    case 'empty':
+      return 0;
+    case 'burn_in':
+      return 0;
+    case 'half':
+    default:
+      return config.tankCapacity * 0.5;
+  }
+};
 
 export class WaterBalanceEngine {
   static calculateInflow(rainData: RainfallDataRow[], config: InflowConfig): (RainfallDataRow & { inflow_liters: number })[] {
-    // Aggregate total roof area across all buildings
     const totalRoofArea = config.buildings.reduce(
-      (sum, b) => sum + (b.numberOfClassrooms * b.roofAreaPerClassroom), 
-      0
+      (sum, building) => sum + (building.numberOfClassrooms * building.roofAreaPerClassroom),
+      0,
     );
-    
+
     return rainData.map(day => {
-      // First flush loss (applied per rainy day)
-      let effectiveRain = Math.max(0, day.rain_mm - config.firstFlushLoss);
-      
-      // Inflow (L) = Rain (mm) * Area (m2) * Coeff * Gutter Eff
+      const effectiveRain = Math.max(0, day.rain_mm - config.firstFlushLoss);
       const inflow = effectiveRain * totalRoofArea * config.runoffCoefficient * config.gutterEfficiency;
-      
       return {
         ...day,
-        inflow_liters: parseFloat(inflow.toFixed(2))
+        inflow_liters: Number(inflow.toFixed(2)),
       };
     });
   }
 
   static runSimulation(
     inflowData: (RainfallDataRow & { inflow_liters: number })[],
-    wbConfig: WaterBalanceConfig
+    wbConfig: WaterBalanceConfig,
   ): ReliabilityResult {
-    let storage = wbConfig.tankCapacity * 0.5; // Start half full
-    let daysMet = 0;
-    let totalInflow = 0;
-    let totalDemandValue = 0;
-    let droughtDays = 0;
+    if (inflowData.length === 0) {
+      return {
+        tankSize: wbConfig.tankCapacity,
+        reliability: 0,
+        droughtDays: 0,
+        totalInflow: 0,
+        totalDemand: 0,
+      };
+    }
 
     const dailyDemand = wbConfig.totalDailyDemand;
+    const runWindow = wbConfig.initialStorageMode === 'burn_in'
+      ? [...inflowData, ...inflowData.slice(0, Math.min(inflowData.length, 365 * (wbConfig.burnInCycles ?? 1)))]
+      : inflowData;
+    let storage = getInitialStorage(wbConfig);
+    let daysMet = 0;
+    let totalInflow = 0;
+    let totalDemand = 0;
+    let droughtDays = 0;
+    const evaluationStart = wbConfig.initialStorageMode === 'burn_in' ? runWindow.length - inflowData.length : 0;
 
-    inflowData.forEach(day => {
-      totalInflow += day.inflow_liters;
-      totalDemandValue += dailyDemand;
-
-      // Update storage
+    runWindow.forEach((day, index) => {
       storage = Math.min(wbConfig.tankCapacity, storage + day.inflow_liters);
-      
-      if (storage >= dailyDemand) {
+      if (index >= evaluationStart) {
+        totalInflow += day.inflow_liters;
+        totalDemand += dailyDemand;
+        if (storage >= dailyDemand) {
+          storage -= dailyDemand;
+          daysMet += 1;
+        } else {
+          droughtDays += 1;
+          storage = 0;
+        }
+      } else if (storage >= dailyDemand) {
         storage -= dailyDemand;
-        daysMet++;
       } else {
-        // Demand not fully met
-        droughtDays++;
         storage = 0;
       }
     });
@@ -56,23 +77,23 @@ export class WaterBalanceEngine {
       tankSize: wbConfig.tankCapacity,
       reliability: (daysMet / inflowData.length) * 100,
       droughtDays,
-      totalInflow,
-      totalDemand: totalDemandValue
+      totalInflow: Number(totalInflow.toFixed(2)),
+      totalDemand: Number(totalDemand.toFixed(2)),
     };
   }
 
   static scanTankSizes(
     inflowData: (RainfallDataRow & { inflow_liters: number })[],
     wbConfig: Omit<WaterBalanceConfig, 'tankCapacity'>,
-    minSize: number = 1000,
-    maxSize: number = 50000,
-    steps: number = 20
+    minSize = 1000,
+    maxSize = 50000,
+    steps = 20,
   ): ReliabilityResult[] {
     const results: ReliabilityResult[] = [];
     const stepSize = (maxSize - minSize) / steps;
 
-    for (let i = 0; i <= steps; i++) {
-      const capacity = minSize + (i * stepSize);
+    for (let index = 0; index <= steps; index += 1) {
+      const capacity = Math.round(minSize + (index * stepSize));
       results.push(this.runSimulation(inflowData, { ...wbConfig, tankCapacity: capacity }));
     }
 

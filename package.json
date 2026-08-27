@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "typecheck": "tsc -p tsconfig.json --pretty false",
+    "test": "tsc -p tsconfig.test.json --pretty false && node -e \"require('fs').writeFileSync('.test-build/package.json', JSON.stringify({ type: 'commonjs' }))\" && node .test-build/tests/run-tests.js"
   },
   "dependencies": {
     "react-dom": "^19.2.4",
@@ -14,8 +16,7 @@
     "recharts": "^3.7.0",
     "lucide-react": "^0.563.0",
     "jstat": "^1.9.6",
-    "simple-statistics": "^7.8.3",
-    "@google/genai": "^1.39.0"
+    "simple-statistics": "^7.8.3"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",

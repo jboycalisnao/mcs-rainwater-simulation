@@ -63,7 +63,7 @@ const HarvestingAnalogies: React.FC<Props> = ({ rainfallData, inflowConfig, dail
     <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm mb-6 animate-in fade-in slide-in-from-top-4 duration-700">
       <div className="flex items-center gap-2 mb-6">
         <Waves size={18} className="text-blue-600" />
-        <h3 className="font-bold text-slate-800 text-sm uppercase tracking-wide">Harvesting Scale & Context</h3>
+        <h3 className="font-bold text-slate-800 text-sm uppercase tracking-wide">What This Water Means</h3>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -74,12 +74,12 @@ const HarvestingAnalogies: React.FC<Props> = ({ rainfallData, inflowConfig, dail
               <Waves size={20} />
             </div>
             <div>
-              <div className="text-[10px] font-bold text-slate-400 uppercase">Total Loop Volume</div>
+          <div className="text-[10px] font-bold text-slate-400 uppercase">Total Water Collected</div>
               <div className="text-lg font-black text-slate-800">
                 {formatNumber(analytics.poolsCount, 1)} {pluralize(analytics.poolsCount, 'Pool', 'Pools')}
               </div>
               <p className="text-[9px] text-slate-500 leading-tight">
-                Equivalent to {formatNumber(analytics.poolsCount, 1)} Olympic-sized swimming pools collected over {formatNumber(analytics.totalYears)} {pluralize(analytics.totalYears, 'year', 'years')}.
+                About this many Olympic-sized swimming pools over {formatNumber(analytics.totalYears)} {pluralize(analytics.totalYears, 'year', 'years')}.
               </p>
             </div>
           </div>
@@ -92,12 +92,12 @@ const HarvestingAnalogies: React.FC<Props> = ({ rainfallData, inflowConfig, dail
               <Truck size={20} />
             </div>
             <div>
-              <div className="text-[10px] font-bold text-slate-400 uppercase">Annual Logistics</div>
+              <div className="text-[10px] font-bold text-slate-400 uppercase">Yearly Water Trucks</div>
               <div className="text-lg font-black text-slate-800">
                 {formatNumber(analytics.annualTrucks, 1)} {pluralize(analytics.annualTrucks, 'Truck', 'Trucks')}
               </div>
               <p className="text-[9px] text-slate-500 leading-tight">
-                The average annual harvest is equal to filling {formatNumber(analytics.annualTrucks, 1)} standard 10kL water tankers.
+                The average year collects about this many 10kL water trucks.
               </p>
             </div>
           </div>
@@ -110,12 +110,12 @@ const HarvestingAnalogies: React.FC<Props> = ({ rainfallData, inflowConfig, dail
               <School size={20} />
             </div>
             <div>
-              <div className="text-[10px] font-bold text-slate-400 uppercase">Demand Coverage</div>
+              <div className="text-[10px] font-bold text-slate-400 uppercase">School Days Covered</div>
               <div className="text-lg font-black text-slate-800">
                 {formatNumber(analytics.annualSupplyDays, 0)} {pluralize(Math.floor(analytics.annualSupplyDays), 'Day', 'Days')}
               </div>
               <p className="text-[9px] text-slate-500 leading-tight">
-                Annually, the aggregate roof area collects enough water to cover {formatNumber(analytics.annualSupplyDays, 0)} {pluralize(Math.floor(analytics.annualSupplyDays), 'day', 'days')} of your school's current demand.
+                In an average year, the roofs collect enough water for about {formatNumber(analytics.annualSupplyDays, 0)} school-use {pluralize(Math.floor(analytics.annualSupplyDays), 'day', 'days')}.
               </p>
             </div>
           </div>
@@ -127,7 +127,7 @@ const HarvestingAnalogies: React.FC<Props> = ({ rainfallData, inflowConfig, dail
            <Droplets size={24} />
         </div>
         <div className="text-[10px] text-slate-600 leading-relaxed">
-          <span className="font-bold text-primary">Interpretation:</span> This visualization compares the <span className="italic">Potential Inflow</span> against recognizable physical volumes. If your annual supply days are less than 365, your roof area might be too small to achieve 100% year-round reliability regardless of tank size.
+          <span className="font-bold text-primary">Simple reading:</span> If the school days covered is far below 365, the roofs may not collect enough water for the full year even with a larger tank.
         </div>
       </div>
     </div>

@@ -1,23 +1,88 @@
+export type WetDayClassification = 'wet' | 'dry';
 
 export interface MonthlyParameters {
   month: number;
-  p01: number; // Transition prob: Dry to Wet
-  p11: number; // Transition prob: Wet to Wet
-  meanRain: number; // Mean rain depth on wet days (mm)
-  stdDev: number; // Std dev for distribution
-  gamma_k?: number; // Shape parameter
-  gamma_theta?: number; // Scale parameter
-  meanDrySpell?: number; // Mean duration of dry spells (days)
-  varDrySpell?: number; // Variance of dry spells (days)
-  meanWetSpell?: number; // Mean duration of wet spells (days)
-  varWetSpell?: number; // Variance of wet spells (days)
-  avgDrySpell?: number; // Legacy/Alias for meanDrySpell
-  avgWetSpell?: number; // Legacy/Alias for meanWetSpell
+  p01: number;
+  p11: number;
+  meanRain: number;
+  stdDev: number;
+  gamma_k?: number;
+  gamma_theta?: number;
+  meanDrySpell?: number;
+  varDrySpell?: number;
+  meanWetSpell?: number;
+  varWetSpell?: number;
+  avgDrySpell?: number;
+  avgWetSpell?: number;
 }
 
 export interface HistoricalRecord {
   date: string;
   rain_mm: number;
+}
+
+export interface ParsedHistoricalRecord extends HistoricalRecord {
+  isoDate: string;
+  timestamp: number;
+  rowNumber: number;
+}
+
+export interface CalibrationWarning {
+  code:
+    | 'UNSUPPORTED_DATE'
+    | 'INVALID_RAIN_VALUE'
+    | 'DUPLICATE_DATE'
+    | 'MISSING_DAYS'
+    | 'SPARSE_MONTH'
+    | 'FALLBACK_DEFAULT'
+    | 'FALLBACK_SMOOTHED'
+    | 'PARTIAL_MONTH'
+    | 'LOW_CONFIDENCE';
+  message: string;
+  month?: number;
+  rowNumber?: number;
+}
+
+export interface MonthlyCoverageStats {
+  month: number;
+  observedDays: number;
+  expectedDays: number;
+  missingDays: number;
+  wetDays: number;
+  dryDays: number;
+}
+
+export interface FitMetrics {
+  meanRainMae: number;
+  wetFrequencyMae: number;
+  spellLengthMae: number;
+  overallScore: number;
+}
+
+export interface CalibrationMonthlyDiagnostic {
+  month: number;
+  source: 'historical' | 'smoothed' | 'default';
+  observedWetDays: number;
+  observedTransitions: number;
+  observedDays: number;
+  expectedDays: number;
+  missingDays: number;
+  fitScore: number;
+}
+
+export interface CalibrationResult {
+  parameters: MonthlyParameters[];
+  warnings: CalibrationWarning[];
+  coverage: {
+    totalObservedDays: number;
+    totalMissingDays: number;
+    duplicateDays: number;
+    dateRange: { start: string; end: string } | null;
+    monthly: MonthlyCoverageStats[];
+  };
+  fit: FitMetrics;
+  monthlyDiagnostics: CalibrationMonthlyDiagnostic[];
+  sourceRecordCount: number;
 }
 
 export interface RainfallDataRow {
@@ -26,6 +91,8 @@ export interface RainfallDataRow {
   month: number;
   rain_mm: number;
   wet: boolean;
+  observed_wet?: boolean;
+  latent_wet?: boolean;
 }
 
 export interface Building {
@@ -39,23 +106,67 @@ export interface InflowConfig {
   buildings: Building[];
   runoffCoefficient: number;
   gutterEfficiency: number;
-  firstFlushLoss: number; // mm
+  firstFlushLoss: number;
 }
 
 export interface WaterBalanceConfig {
   handWashingAreas: number;
   faucetsPerArea: number;
   litersPerFaucetDay: number;
-  totalDailyDemand: number; // This is the derived total used by the engine
-  tankCapacity: number; // Liters
+  totalDailyDemand: number;
+  tankCapacity: number;
+  initialStorageMode?: 'empty' | 'half' | 'burn_in';
+  burnInCycles?: number;
 }
 
 export interface ReliabilityResult {
   tankSize: number;
-  reliability: number; // Percentage
+  reliability: number;
   droughtDays?: number;
   totalInflow?: number;
   totalDemand?: number;
+}
+
+export interface ReliabilityIntervalResult extends ReliabilityResult {
+  medianReliability: number;
+  conservativeReliability: number;
+  optimisticReliability: number;
+  reliabilitySpread: [number, number];
+  droughtDaysRange: [number, number];
+  totalInflowRange: [number, number];
+  sampleCount: number;
+}
+
+export interface EnsembleSettings {
+  runs: number;
+  baseSeed: number;
+  generatedYears: number;
+  conservativePercentile: number;
+}
+
+export interface MonthlySummary {
+  month: string;
+  avgRain?: number;
+  avgInflow: number;
+  wetFrequency?: number;
+  count?: number;
+}
+
+export interface SummaryData {
+  monthly: MonthlySummary[];
+  weekly: { week: string; avgInflow: number; avgRain: number }[];
+  annualInflow: number;
+  annualRain: number;
+  simulationYears: number;
+}
+
+export interface ReportCoverDetails {
+  title: string;
+  preparedBy: string;
+  schoolName: string;
+  location: string;
+  reportDate: string;
+  notes: string;
 }
 
 export interface SimulationReportJSON {
@@ -75,13 +186,19 @@ export interface SimulationReportJSON {
   reliability_table: {
     tank_L: Record<string, number>;
     reliability_pct: Record<string, number>;
+    median_reliability_pct?: Record<string, number>;
+    optimistic_reliability_pct?: Record<string, number>;
   };
+  calibration?: {
+    fit_score: number;
+    warnings: string[];
+    total_missing_days: number;
+    monthly_sources: Record<string, string>;
+  };
+  uncertainty?: {
+    conservative_percentile: number;
+    runs: number;
+  };
+  assumptions?: string[];
   generated_at: string;
-}
-
-export interface MonthlySummary {
-  month: string;
-  avgRain?: number;
-  avgInflow: number;
-  count?: number;
 }

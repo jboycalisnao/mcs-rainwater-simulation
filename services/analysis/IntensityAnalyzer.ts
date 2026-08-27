@@ -1,39 +1,37 @@
-
 import * as ss from 'simple-statistics';
+import { WET_DAY_THRESHOLD_MM } from '../../constants';
 import { HistoricalRecord, MonthlyParameters } from '../../types';
 
+const monthFromDate = (value: string) => Number.parseInt(value.slice(5, 7), 10);
+
 export class IntensityAnalyzer {
-  /**
-   * Calculates intensity parameters (mean, stdDev, Gamma) for wet days.
-   */
   static analyze(data: HistoricalRecord[]): Partial<MonthlyParameters>[] {
     const monthData: Record<number, number[]> = {};
 
-    data.forEach(d => {
-      if (d.rain_mm > 0.1) {
-        const month = new Date(d.date).getMonth() + 1;
-        if (!monthData[month]) monthData[month] = [];
-        monthData[month].push(d.rain_mm);
+    data.forEach(record => {
+      if (record.rain_mm >= WET_DAY_THRESHOLD_MM) {
+        const month = monthFromDate(record.date);
+        if (!monthData[month]) {
+          monthData[month] = [];
+        }
+        monthData[month].push(record.rain_mm);
       }
     });
 
-    return Object.entries(monthData).map(([month, amounts]) => {
+    return Object.entries(monthData).map(([monthValue, amounts]) => {
       const mean = ss.mean(amounts);
-      const variance = ss.variance(amounts);
-      const stdDev = ss.standardDeviation(amounts);
-
-      // Method of Moments for Gamma distribution
-      // k (shape) = mean^2 / variance
-      // theta (scale) = variance / mean
-      const k = (mean * mean) / (variance || 1);
-      const theta = variance / (mean || 1);
+      const variance = amounts.length > 1 ? ss.variance(amounts) : 0;
+      const stdDev = amounts.length > 1 ? ss.standardDeviation(amounts) : 0;
+      const safeVariance = Math.max(variance, 0.01);
+      const k = (mean * mean) / safeVariance;
+      const theta = safeVariance / Math.max(mean, 0.01);
 
       return {
-        month: parseInt(month),
-        meanRain: parseFloat(mean.toFixed(2)),
-        stdDev: parseFloat(stdDev.toFixed(2)),
-        gamma_k: parseFloat(k.toFixed(3)),
-        gamma_theta: parseFloat(theta.toFixed(3))
+        month: Number.parseInt(monthValue, 10),
+        meanRain: Number(mean.toFixed(2)),
+        stdDev: Number(stdDev.toFixed(2)),
+        gamma_k: Number(k.toFixed(3)),
+        gamma_theta: Number(theta.toFixed(3)),
       };
     });
   }

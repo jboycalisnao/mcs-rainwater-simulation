@@ -1,4 +1,4 @@
-
+﻿
 import React, { useMemo } from 'react';
 import { Building } from '../../types';
 
@@ -101,7 +101,7 @@ const RoofHarvestVisualizer: React.FC<Props> = ({
         {/* Central Collection Tank (Hub) */}
         <g transform={`translate(${width - 120}, ${height / 2 - 50})`}>
           <rect width="70" height="100" rx="10" fill="#0f172a" stroke="#1e293b" strokeWidth="3" />
-          <text x="35" y="-12" textAnchor="middle" fill="#64748b" fontSize="8" fontWeight="900" className="uppercase tracking-[0.2em]">Main Reservoir</text>
+          <text x="35" y="-12" textAnchor="middle" fill="#64748b" fontSize="8" fontWeight="900" className="uppercase tracking-[0.2em]">Storage Tank</text>
           
           {/* Water Level inside tank */}
           <rect 
@@ -185,7 +185,7 @@ const RoofHarvestVisualizer: React.FC<Props> = ({
               ))}
 
               <text x={b.x} y={b.y - 8} fill="#3b82f6" fontSize="8" fontWeight="bold" className="uppercase tracking-widest">{b.name}</text>
-              <text x={b.x} y={b.y + b.height + 12} fill="#475569" fontSize="7" fontWeight="medium">{formatNumber(b.area)} m² catchment</text>
+              <text x={b.x} y={b.y + b.height + 12} fill="#475569" fontSize="7" fontWeight="medium">{formatNumber(b.area)} m2 roof area</text>
             </g>
           );
         })}
@@ -213,25 +213,25 @@ const RoofHarvestVisualizer: React.FC<Props> = ({
       {/* Dashboard Overlays */}
       <div className="absolute top-6 left-6 flex flex-col gap-4">
         <div className="bg-slate-900/60 backdrop-blur-xl border border-white/5 p-5 rounded-2xl shadow-2xl">
-          <div className="text-[10px] font-black text-blue-400 uppercase tracking-[0.2em] mb-1">Catchment Status</div>
+          <div className="text-[10px] font-black text-blue-400 uppercase tracking-[0.2em] mb-1">Water Collected Now</div>
           <div className="flex items-baseline gap-2">
             <span className="text-4xl font-black text-white tabular-nums tracking-tighter">
               {formatNumber(totalHarvestedLiters, 1)}
             </span>
-            <span className="text-xs font-bold text-slate-500 uppercase">Liters / Tick</span>
+            <span className="text-xs font-bold text-slate-500 uppercase">Liters today</span>
           </div>
           
           <div className="mt-4 grid grid-cols-2 gap-x-6 gap-y-2 border-t border-white/5 pt-4">
             <div>
-              <div className="text-[8px] text-slate-500 font-bold uppercase">Rain Intensity</div>
+              <div className="text-[8px] text-slate-500 font-bold uppercase">Rain today</div>
               <div className="text-xs text-white font-mono">{formatNumber(rainIntensity, 1)} mm</div>
             </div>
             <div>
-              <div className="text-[8px] text-slate-500 font-bold uppercase">Node Area</div>
-              <div className="text-xs text-white font-mono">{formatNumber(buildings.reduce((s,b)=>s+(b.numberOfClassrooms*b.roofAreaPerClassroom),0))} m²</div>
+              <div className="text-[8px] text-slate-500 font-bold uppercase">Roof area</div>
+              <div className="text-xs text-white font-mono">{formatNumber(buildings.reduce((s,b)=>s+(b.numberOfClassrooms*b.roofAreaPerClassroom),0))} m2</div>
             </div>
             <div className="col-span-2 mt-1">
-              <div className="text-[8px] text-slate-500 font-bold uppercase">System Month</div>
+              <div className="text-[8px] text-slate-500 font-bold uppercase">Month</div>
               <div className="text-[11px] text-blue-400 font-black uppercase tracking-widest">{currentMonth}</div>
             </div>
           </div>
@@ -244,7 +244,7 @@ const RoofHarvestVisualizer: React.FC<Props> = ({
               <span className="h-1 w-1 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></span>
               <span className="h-1 w-1 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></span>
             </div>
-            <span className="text-[9px] font-black text-blue-400 uppercase tracking-widest">Hydraulic Analysis Active</span>
+            <span className="text-[9px] font-black text-blue-400 uppercase tracking-widest">Rain test running</span>
           </div>
         )}
       </div>
@@ -270,3 +270,5 @@ const RoofHarvestVisualizer: React.FC<Props> = ({
 };
 
 export default RoofHarvestVisualizer;
+
+
