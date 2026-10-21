@@ -36,14 +36,14 @@ const HistoricalAnalysisModule: React.FC<Props> = ({ onCalibrationComplete }) =>
   };
 
   return (
-    <div className="bg-slate-50 rounded-lg p-4 border border-slate-200 space-y-3">
+    <div className="bg-slate-50 rounded-md p-4 border border-slate-200 space-y-3">
       <div className="flex items-center gap-3">
         <Database className="text-primary w-5 h-5" />
         <h3 className="font-bold text-slate-800 text-sm">Upload Past Rain Records</h3>
       </div>
 
       {!calibrationResult ? (
-        <div className="text-center py-6 border-2 border-dashed border-slate-300 rounded-lg bg-white">
+        <div className="text-center py-6 border-2 border-dashed border-slate-300 rounded-md bg-white">
           <label className="cursor-pointer">
             <input type="file" accept=".csv" className="hidden" onChange={handleFileUpload} disabled={isAnalyzing} />
             <FileUp className="w-8 h-8 mx-auto text-slate-400 mb-2" />
@@ -56,7 +56,7 @@ const HistoricalAnalysisModule: React.FC<Props> = ({ onCalibrationComplete }) =>
         </div>
       ) : (
         <div className="space-y-3">
-          <div className="flex items-center justify-between text-xs text-green-600 bg-green-50 p-2 rounded border border-green-100">
+          <div className="flex items-center justify-between text-xs text-green-600 bg-green-50 p-2 rounded-md border border-green-100">
             <div className="flex items-center gap-1 font-bold">
               <CheckCircle2 size={14} /> Rain Records Loaded
             </div>
@@ -67,7 +67,7 @@ const HistoricalAnalysisModule: React.FC<Props> = ({ onCalibrationComplete }) =>
             {calibrationResult.parameters.map(parameter => {
               const diagnostic = calibrationResult.monthlyDiagnostics.find(entry => entry.month === parameter.month);
               return (
-                <div key={parameter.month} className="bg-white p-2 rounded border border-slate-200 text-[10px]">
+                <div key={parameter.month} className="bg-white p-2 rounded-md border border-slate-200 text-[10px]">
                   <div className="font-bold text-slate-700 border-b border-slate-100 mb-1 flex justify-between">
                     <span>{MONTH_NAMES[parameter.month - 1]}</span>
                     <Wind size={10} className="text-slate-300" />
@@ -81,7 +81,7 @@ const HistoricalAnalysisModule: React.FC<Props> = ({ onCalibrationComplete }) =>
             })}
           </div>
 
-          <div className="bg-blue-50 p-2 rounded text-[9px] text-blue-700 flex gap-2">
+          <div className="bg-blue-50 p-2 rounded-md text-[9px] text-blue-700 flex gap-2">
             <Info size={14} className="shrink-0" />
             <span>Data match is {calibrationResult.fit.overallScore.toFixed(1)}/100. {calibrationResult.coverage.totalMissingDays} missing day(s) were found, so the dashboard keeps results cautious.</span>
           </div>

@@ -60,7 +60,7 @@ const HarvestingAnalogies: React.FC<Props> = ({ rainfallData, inflowConfig, dail
   };
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm mb-6 animate-in fade-in slide-in-from-top-4 duration-700">
+    <div className="bg-white rounded-md border border-slate-200 p-5 shadow-sm mb-6 animate-in fade-in slide-in-from-top-4 duration-700">
       <div className="flex items-center gap-2 mb-6">
         <Waves size={18} className="text-blue-600" />
         <h3 className="font-bold text-slate-800 text-sm uppercase tracking-wide">What This Water Means</h3>
@@ -70,7 +70,7 @@ const HarvestingAnalogies: React.FC<Props> = ({ rainfallData, inflowConfig, dail
         {/* Analogies: Volumetric */}
         <div className="space-y-4">
           <div className="flex items-start gap-3">
-            <div className="p-2 bg-blue-50 rounded-lg text-blue-600">
+            <div className="p-2 bg-blue-50 rounded-md text-blue-600">
               <Waves size={20} />
             </div>
             <div>
@@ -88,7 +88,7 @@ const HarvestingAnalogies: React.FC<Props> = ({ rainfallData, inflowConfig, dail
         {/* Analogies: Logistics */}
         <div className="space-y-4 border-l border-slate-100 pl-0 md:pl-6">
           <div className="flex items-start gap-3">
-            <div className="p-2 bg-amber-50 rounded-lg text-amber-600">
+            <div className="p-2 bg-amber-50 rounded-md text-amber-600">
               <Truck size={20} />
             </div>
             <div>
@@ -106,7 +106,7 @@ const HarvestingAnalogies: React.FC<Props> = ({ rainfallData, inflowConfig, dail
         {/* Demand Coverage */}
         <div className="space-y-4 border-l border-slate-100 pl-0 md:pl-6">
           <div className="flex items-start gap-3">
-            <div className="p-2 bg-green-50 rounded-lg text-green-600">
+            <div className="p-2 bg-green-50 rounded-md text-green-600">
               <School size={20} />
             </div>
             <div>
@@ -122,7 +122,7 @@ const HarvestingAnalogies: React.FC<Props> = ({ rainfallData, inflowConfig, dail
         </div>
       </div>
 
-      <div className="mt-6 bg-slate-50 border border-slate-100 p-3 rounded-lg flex items-center gap-3">
+      <div className="mt-6 bg-slate-50 border border-slate-100 p-3 rounded-md flex items-center gap-3">
         <div className="shrink-0 text-primary opacity-40">
            <Droplets size={24} />
         </div>

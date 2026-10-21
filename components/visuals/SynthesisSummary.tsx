@@ -31,14 +31,14 @@ const SynthesisSummary: React.FC<Props> = ({ data, summary }) => {
   });
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm mb-6">
+    <div className="bg-white rounded-md border border-slate-200 p-5 shadow-sm mb-6">
       <div className="flex items-center gap-2 mb-4">
         <ShieldCheck size={18} className="text-emerald-600" />
         <h3 className="font-bold text-slate-800 text-sm uppercase tracking-wide">Rain Test Summary</h3>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-slate-50 p-3 rounded-lg border border-slate-100">
+        <div className="bg-slate-50 p-3 rounded-md border border-slate-100">
           <div className="flex items-center gap-2 text-slate-400 mb-1">
             <Calendar size={14} />
             <span className="text-[10px] font-bold uppercase">Years Tested</span>
@@ -46,7 +46,7 @@ const SynthesisSummary: React.FC<Props> = ({ data, summary }) => {
           <div className="text-lg font-black text-slate-700">{formatNumber(summary.simulationYears)} Years</div>
           <div className="text-[9px] text-slate-400">Length of each rain test</div>
         </div>
-        <div className="bg-slate-50 p-3 rounded-lg border border-slate-100">
+        <div className="bg-slate-50 p-3 rounded-md border border-slate-100">
           <div className="flex items-center gap-2 text-blue-500 mb-1">
             <CloudRain size={14} />
             <span className="text-[10px] font-bold uppercase">Yearly Rain</span>
@@ -54,7 +54,7 @@ const SynthesisSummary: React.FC<Props> = ({ data, summary }) => {
           <div className="text-lg font-black text-slate-700">{formatNumber(summary.annualRain, 1)} mm</div>
           <div className="text-[9px] text-slate-400">Average rain per tested year</div>
         </div>
-        <div className="bg-slate-50 p-3 rounded-lg border border-slate-100">
+        <div className="bg-slate-50 p-3 rounded-md border border-slate-100">
           <div className="flex items-center gap-2 text-indigo-500 mb-1">
             <Cloud size={14} />
             <span className="text-[10px] font-bold uppercase">Rainy Days</span>
@@ -62,7 +62,7 @@ const SynthesisSummary: React.FC<Props> = ({ data, summary }) => {
           <div className="text-lg font-black text-slate-700">{formatNumber(wetFrequency, 1)}%</div>
           <div className="text-[9px] text-slate-400">Share of days with rain</div>
         </div>
-        <div className="bg-slate-50 p-3 rounded-lg border border-slate-100">
+        <div className="bg-slate-50 p-3 rounded-md border border-slate-100">
           <div className="flex items-center gap-2 text-amber-600 mb-1">
             <Sun size={14} />
             <span className="text-[10px] font-bold uppercase">Usual Dry Stretch</span>
@@ -76,7 +76,7 @@ const SynthesisSummary: React.FC<Props> = ({ data, summary }) => {
         <div className="text-slate-500 italic">
           Biggest rain day in this test: <span className="font-bold text-slate-700">{formatNumber(maxIntensity, 1)} mm</span>
         </div>
-        <div className="font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded uppercase border border-emerald-100">
+        <div className="font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md uppercase border border-emerald-100">
           Cautious result shown
         </div>
       </div>

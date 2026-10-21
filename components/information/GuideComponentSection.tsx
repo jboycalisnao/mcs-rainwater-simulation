@@ -34,7 +34,8 @@ const components = [
     title: 'Daily Water Use',
     points: [
       'Estimates demand, which means the water needed per day.',
-      'Uses handwashing areas, faucets per area, and liters per faucet per day.',
+      'Combines handwashing stations and comfort room (toilet flush/cleaning) water needs.',
+      'Calibrated against campus population using DepEd WinS Order 10 s.2016 and WHO/UNICEF WASH guidelines (~2.2 L/person/day).',
       'Provides the daily withdrawal used in the water balance calculation.',
     ],
   },
@@ -59,9 +60,9 @@ const components = [
 ];
 
 const GuideComponentSection: React.FC = () => (
-  <section id="guide-components" className="mt-6 scroll-mt-24 rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+  <section id="guide-components" className="rounded-md border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
     <div className="flex items-center gap-3">
-      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700">
+      <div className="flex h-10 w-10 items-center justify-center rounded-md bg-emerald-50 text-emerald-700">
         <Layers3 size={20} />
       </div>
       <div>
@@ -72,8 +73,8 @@ const GuideComponentSection: React.FC = () => (
 
     <div className="mt-5 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
       {components.map(component => (
-        <article key={component.title} className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-          <div className="flex items-center gap-2 text-[#010e5b]">
+        <article key={component.title} className="rounded-md border border-slate-200 bg-slate-50 p-4">
+          <div className="flex items-center gap-2 text-[#0053DF]">
             {component.icon}
             <h4 className="text-sm font-black text-slate-900">{component.title}</h4>
           </div>

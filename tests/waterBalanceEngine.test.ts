@@ -67,4 +67,23 @@ const emptyStart = WaterBalanceEngine.runSimulation(shortInflow, { ...config, in
 const burnIn = WaterBalanceEngine.runSimulation(shortInflow, { ...config, initialStorageMode: 'burn_in', burnInCycles: 1 });
 assert.ok(burnIn.reliability >= emptyStart.reliability);
 
+// Multi-facility demand configuration test
+const multiFacilityConfig: WaterBalanceConfig = {
+  handWashingAreas: 4,
+  faucetsPerArea: 5,
+  litersPerFaucetDay: 25,
+  comfortRooms: 4,
+  toiletsPerRoom: 2,
+  litersPerToiletDay: 62.5,
+  populationServed: 450,
+  totalDailyDemand: (4 * 5 * 25) + (4 * 2 * 62.5), // 500 + 500 = 1000 L/day
+  tankCapacity: 26500,
+  initialStorageMode: 'empty',
+};
+
+assert.equal(multiFacilityConfig.totalDailyDemand, 1000);
+const multiResult = WaterBalanceEngine.runSimulation(shortInflow, multiFacilityConfig);
+assert.equal(multiResult.totalDemand, 3000); // 3 days x 1000 L/day
+
 console.log('waterBalanceEngine.test.ts passed');
+

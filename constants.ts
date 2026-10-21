@@ -1,7 +1,7 @@
 import { MonthlyParameters } from './types';
 
 export const COLORS = {
-  primary: '#010e5b',
+  primary: '#0053DF',
   secondary: '#ca080b',
 };
 

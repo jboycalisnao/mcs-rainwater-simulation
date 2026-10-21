@@ -10,10 +10,10 @@ interface ModuleCardProps {
 
 const ModuleCard: React.FC<ModuleCardProps> = ({ title, icon, children, step }) => {
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden mb-6">
+    <div className="bg-white rounded-md shadow-sm border border-slate-200 overflow-hidden mb-6">
       <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-[#010e5b] text-white flex items-center justify-center text-sm font-bold">
+          <div className="w-8 h-8 rounded-full bg-[#0053DF] text-white flex items-center justify-center text-sm font-bold">
             {step}
           </div>
           <h2 className="text-lg font-semibold text-slate-800">{title}</h2>

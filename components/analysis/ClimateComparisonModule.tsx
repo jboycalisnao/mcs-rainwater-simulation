@@ -73,7 +73,7 @@ const ClimateComparisonModule: React.FC = () => {
           const active = label === 'A' ? dataA : dataB;
           const isBusy = isAnalyzing === label;
           return (
-            <div key={label} className={`p-4 rounded-xl border-2 border-dashed transition-all ${active ? label === 'A' ? 'border-blue-200 bg-blue-50' : 'border-red-200 bg-red-50' : 'border-slate-200 bg-white'}`}>
+            <div key={label} className={`p-4 rounded-md border-2 border-dashed transition-all ${active ? label === 'A' ? 'border-blue-200 bg-blue-50' : 'border-red-200 bg-red-50' : 'border-slate-200 bg-white'}`}>
               <div className="flex items-center justify-between mb-2">
                 <span className={`text-[10px] font-bold uppercase tracking-widest ${label === 'A' ? 'text-blue-600' : 'text-red-600'}`}>Dataset {label}</span>
                 {active && <CheckCircle2 size={14} className={label === 'A' ? 'text-blue-500' : 'text-red-500'} />}
@@ -91,13 +91,13 @@ const ClimateComparisonModule: React.FC = () => {
       </div>
 
       {dataA && dataB ? (
-        <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
+        <div className="bg-white rounded-md border border-slate-200 p-4 shadow-sm">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-2">
               <ArrowRightLeft size={18} className="text-primary" />
               <h4 className="text-sm font-bold text-slate-800">Rain Record Comparison</h4>
             </div>
-            <div className={`px-2 py-1 rounded text-[10px] font-bold flex items-center gap-1 ${delta >= 0 ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
+            <div className={`px-2 py-1 rounded-md text-[10px] font-bold flex items-center gap-1 ${delta >= 0 ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
               <Zap size={10} />
               {delta >= 0 ? '+' : ''}{delta.toFixed(1)}% Rain Change
             </div>
@@ -111,14 +111,14 @@ const ClimateComparisonModule: React.FC = () => {
                 <YAxis fontSize={9} axisLine={false} tickLine={false} />
                 <Tooltip />
                 <Legend iconType="circle" wrapperStyle={{ fontSize: '10px', paddingTop: '10px' }} />
-                <Bar name="Usual Rain A" dataKey="rainA" fill="#010e5b" radius={[2, 2, 0, 0]} />
+                <Bar name="Usual Rain A" dataKey="rainA" fill="#0053DF" radius={[2, 2, 0, 0]} />
                 <Bar name="Usual Rain B" dataKey="rainB" fill="#ca080b" radius={[2, 2, 0, 0]} />
               </RechartsBar>
             </ResponsiveContainer>
           </div>
 
           <div className="grid grid-cols-2 gap-2 mt-4 text-[10px]">
-            <div className="bg-slate-50 p-2 rounded">
+            <div className="bg-slate-50 p-2 rounded-md">
               <div className="text-slate-400 font-bold uppercase mb-1">Rainy Day Chance</div>
               <div className="flex justify-between items-center">
                 <span className="text-primary font-bold">A: {(dataA.parameters.reduce((sum, item) => sum + item.p01, 0) / 12).toFixed(3)}</span>
@@ -126,7 +126,7 @@ const ClimateComparisonModule: React.FC = () => {
                 <span className="text-secondary font-bold">B: {(dataB.parameters.reduce((sum, item) => sum + item.p01, 0) / 12).toFixed(3)}</span>
               </div>
             </div>
-            <div className="bg-slate-50 p-2 rounded">
+            <div className="bg-slate-50 p-2 rounded-md">
               <div className="text-slate-400 font-bold uppercase mb-1">Data Match Score</div>
               <div className="flex justify-between items-center">
                 <span className="text-primary font-bold">A: {dataA.fit.overallScore.toFixed(1)}</span>
@@ -137,7 +137,7 @@ const ClimateComparisonModule: React.FC = () => {
           </div>
         </div>
       ) : (
-        <div className="py-12 flex flex-col items-center justify-center text-slate-400 bg-slate-50 rounded-xl border border-dashed border-slate-200">
+        <div className="py-12 flex flex-col items-center justify-center text-slate-400 bg-slate-50 rounded-md border border-dashed border-slate-200">
           <ArrowRightLeft size={32} className="opacity-20 mb-2" />
           <p className="text-xs">Upload two rain records to compare them</p>
         </div>

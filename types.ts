@@ -113,6 +113,10 @@ export interface WaterBalanceConfig {
   handWashingAreas: number;
   faucetsPerArea: number;
   litersPerFaucetDay: number;
+  comfortRooms?: number;
+  toiletsPerRoom?: number;
+  litersPerToiletDay?: number;
+  populationServed?: number;
   totalDailyDemand: number;
   tankCapacity: number;
   initialStorageMode?: 'empty' | 'half' | 'burn_in';

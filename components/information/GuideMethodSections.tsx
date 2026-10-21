@@ -43,7 +43,7 @@ const sections = [
 ];
 
 const GuideMethodSections: React.FC = () => (
-  <section id="guide-method" className="mt-6 scroll-mt-24 rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+  <section id="guide-method" className="rounded-md border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
     <div className="border-b border-slate-200 pb-4">
       <h3 className="text-lg font-black text-slate-900">Scientific method used by the simulation</h3>
       <p className="mt-1 text-sm text-slate-500">Each topic below explains one part of the model in scientific but simple terms.</p>
@@ -51,9 +51,9 @@ const GuideMethodSections: React.FC = () => (
 
     <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
       {sections.map(section => (
-        <article key={section.title} className="border border-slate-200 bg-slate-50 p-5">
+        <article key={section.title} className="border border-slate-200 bg-slate-50 p-5 rounded-md">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white text-[#010e5b]">
+            <div className="flex h-10 w-10 items-center justify-center rounded-md bg-white text-[#0053DF]">
               {section.icon}
             </div>
             <h4 className="text-base font-black text-slate-900">{section.title}</h4>

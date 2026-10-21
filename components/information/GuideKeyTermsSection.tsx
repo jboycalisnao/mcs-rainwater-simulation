@@ -29,9 +29,9 @@ const keyTerms = [
 ];
 
 const GuideKeyTermsSection: React.FC = () => (
-  <section id="guide-terms" className="mt-6 scroll-mt-24 rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+  <section id="guide-terms" className="rounded-md border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
     <div className="flex items-center gap-3">
-      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-50 text-amber-700">
+      <div className="flex h-10 w-10 items-center justify-center rounded-md bg-amber-50 text-amber-700">
         <HelpCircle size={20} />
       </div>
       <div>
@@ -42,7 +42,7 @@ const GuideKeyTermsSection: React.FC = () => (
 
     <div className="mt-5 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
       {keyTerms.map(item => (
-        <article key={item.term} className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+        <article key={item.term} className="rounded-md border border-slate-200 bg-slate-50 p-4">
           <h4 className="text-sm font-black text-slate-900">{item.term}</h4>
           <ul className="mt-2 list-disc pl-5 text-sm leading-5 text-slate-600">
             <li>{item.meaning}</li>

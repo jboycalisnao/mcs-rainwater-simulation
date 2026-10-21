@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
   ArrowRightLeft,
   Building2,
   CloudRain,
   Droplets,
   Info,
+  Lock,
   Play,
   RefreshCw,
   Ruler,
@@ -71,7 +73,7 @@ const DashboardSidebar: React.FC<Props> = ({
   return (
     <div className="space-y-6">
       <ModuleCard title="Rain Records" icon={<RefreshCw size={20} />} step={1}>
-        <div className="flex p-1 bg-slate-100 rounded-lg mb-4">
+        <div className="flex p-1 bg-slate-100 rounded-md mb-4">
           <button onClick={() => setSidebarTab('calibrate')} className={`flex-1 flex items-center justify-center gap-2 py-1.5 text-[10px] font-bold uppercase rounded-md transition-all ${sidebarTab === 'calibrate' ? 'bg-white text-primary shadow-sm' : 'text-slate-400'}`}>
             <RefreshCw size={12} /> Use Data
           </button>
@@ -105,13 +107,19 @@ const DashboardSidebar: React.FC<Props> = ({
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-500 uppercase mb-1">Run ID</label>
-            <div className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm bg-slate-50 text-slate-700 font-medium">
-              {genSeed}
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-xs font-semibold text-slate-500 uppercase">Run ID</label>
+              <span className="inline-flex items-center gap-1 text-[10px] font-medium text-slate-400 italic">
+                <Lock size={10} className="text-slate-400" /> Auto-generated
+              </span>
+            </div>
+            <div className="w-full border border-slate-200 rounded-md px-3 py-2 text-sm bg-slate-100 text-slate-400 font-mono select-none cursor-not-allowed flex items-center justify-between">
+              <span>{genSeed}</span>
+              <span className="text-[10px] font-sans font-semibold uppercase tracking-wider text-slate-400 bg-slate-200/60 px-1.5 py-0.5 rounded">Auto</span>
             </div>
           </div>
 
-          <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 text-[11px] text-slate-600 space-y-1">
+          <div className="bg-slate-50 border border-slate-200 rounded-md p-3 text-[11px] text-slate-600 space-y-1">
             <div className="font-bold text-slate-700">How results are checked</div>
             <div>The dashboard tests {defaultEnsembleRuns} possible rain patterns and shows the safer tank result.</div>
           </div>
@@ -122,16 +130,17 @@ const DashboardSidebar: React.FC<Props> = ({
         </div>
       </ModuleCard>
 
-      {isRainfallHelpOpen && (
+      {isRainfallHelpOpen && typeof document !== 'undefined' && createPortal(
         <div
-          className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-100/80 px-4"
+          className="fixed inset-0 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm px-4"
+          style={{ zIndex: 99999 }}
           onClick={() => setIsRainfallHelpOpen(false)}
         >
           <div
             role="dialog"
             aria-modal="true"
             aria-labelledby="rainfall-help-title"
-            className="w-full max-w-lg rounded-2xl bg-white shadow-2xl border border-slate-200"
+            className="w-full max-w-lg rounded-md bg-white shadow-2xl border border-slate-200 overflow-hidden"
             onClick={event => event.stopPropagation()}
           >
             <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
@@ -156,7 +165,7 @@ const DashboardSidebar: React.FC<Props> = ({
               </div>
               <div>
                 <div className="font-semibold text-slate-800">Run ID</div>
-                <p>A number that lets the same rain test be repeated later.</p>
+                <p>A number that lets the same rain test be repeated later (auto-generated for each simulation run).</p>
               </div>
               <div>
                 <div className="font-semibold text-slate-800">Possible Rain Patterns</div>
@@ -172,22 +181,23 @@ const DashboardSidebar: React.FC<Props> = ({
               <button
                 type="button"
                 onClick={() => setIsRainfallHelpOpen(false)}
-                className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
+                className="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
               >
                 Got it
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       <ModuleCard title="Buildings & Daily Water Use" icon={<Droplets size={20} />} step={3}>
         <div className="space-y-4">
-          <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+          <div className="rounded-md border border-slate-200 bg-slate-50 p-4">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">School setup</div>
-                <p className="mt-1 text-sm text-slate-600">Add buildings, roof sizes, and daily handwashing water needs.</p>
+                <p className="mt-1 text-sm text-slate-600">Configure buildings, catchment roofs, handwash faucets, and comfort rooms.</p>
               </div>
               <div className="rounded-full bg-primary/10 p-2 text-primary">
                 <Building2 size={18} />
@@ -195,43 +205,61 @@ const DashboardSidebar: React.FC<Props> = ({
             </div>
 
             <div className="mt-4 grid grid-cols-2 gap-3">
-              <div className="rounded-lg bg-white border border-slate-200 p-3">
-                <div className="text-[10px] font-bold uppercase text-slate-400">Buildings</div>
-                <div className="mt-1 text-xl font-black text-slate-800">{formatNumber(inflowConfig.buildings.length)}</div>
+              <div className="rounded-md bg-white border border-slate-200 p-3">
+                <div className="text-[10px] font-bold uppercase text-slate-400">Buildings & Roof</div>
+                <div className="mt-1 text-lg font-black text-slate-800">{formatNumber(inflowConfig.buildings.length)} bldgs · {formatNumber(totalRoofArea)} m²</div>
+                <div className="text-[10px] text-slate-400 mt-0.5">{formatNumber(totalClassrooms)} classrooms</div>
               </div>
-              <div className="rounded-lg bg-white border border-slate-200 p-3">
-                <div className="text-[10px] font-bold uppercase text-slate-400">Roof Area</div>
-                <div className="mt-1 text-xl font-black text-slate-800">{formatNumber(totalRoofArea)} m2</div>
+              <div className="rounded-md bg-white border border-slate-200 p-3">
+                <div className="text-[10px] font-bold uppercase text-slate-400">Water Facilities</div>
+                <div className="mt-1 text-lg font-black text-slate-800">
+                  {demandConfig.handWashingAreas * demandConfig.faucetsPerArea} faucets · {(demandConfig.comfortRooms ?? 4) * (demandConfig.toiletsPerRoom ?? 2)} toilets
+                </div>
+                <div className="text-[10px] text-slate-400 mt-0.5">{demandConfig.populationServed ?? 450} students & staff</div>
               </div>
-              <div className="rounded-lg bg-white border border-slate-200 p-3">
-                <div className="text-[10px] font-bold uppercase text-slate-400">Classrooms</div>
-                <div className="mt-1 text-xl font-black text-slate-800">{formatNumber(totalClassrooms)}</div>
+              <div className="rounded-md bg-white border border-slate-200 p-3">
+                <div className="text-[10px] font-bold uppercase text-slate-400">Handwash Demand</div>
+                <div className="mt-1 text-lg font-black text-blue-600">
+                  {formatNumber(demandConfig.handWashingAreas * demandConfig.faucetsPerArea * demandConfig.litersPerFaucetDay)} L/day
+                </div>
+                <div className="text-[10px] text-slate-400 mt-0.5">{demandConfig.handWashingAreas} stations × {demandConfig.faucetsPerArea} taps</div>
               </div>
-              <div className="rounded-lg bg-white border border-slate-200 p-3">
-                <div className="text-[10px] font-bold uppercase text-slate-400">Daily Use</div>
-                <div className="mt-1 text-xl font-black text-slate-800">{formatNumber(aggregateDailyDemand)} L</div>
+              <div className="rounded-md bg-white border border-slate-200 p-3">
+                <div className="text-[10px] font-bold uppercase text-slate-400">Comfort Room Demand</div>
+                <div className="mt-1 text-lg font-black text-emerald-600">
+                  {formatNumber((demandConfig.comfortRooms ?? 4) * (demandConfig.toiletsPerRoom ?? 2) * (demandConfig.litersPerToiletDay ?? 62.5))} L/day
+                </div>
+                <div className="text-[10px] text-slate-400 mt-0.5">{demandConfig.comfortRooms ?? 4} CRs × {demandConfig.toiletsPerRoom ?? 2} cubicles</div>
               </div>
+            </div>
+
+            <div className="mt-3 rounded-md bg-blue-50 border border-blue-200 px-3 py-2 flex items-center justify-between text-xs">
+              <span className="font-bold text-blue-900">Total Campus Daily Demand:</span>
+              <span className="font-black text-[#0053DF] text-sm">
+                {formatNumber(aggregateDailyDemand)} L/day ({((aggregateDailyDemand) / (demandConfig.populationServed || 450)).toFixed(2)} L/person)
+              </span>
             </div>
 
             <button
               type="button"
               onClick={() => setIsInfrastructureOpen(true)}
-              className="mt-4 w-full rounded-lg bg-blue-600 px-4 py-3 text-sm font-bold text-white transition-colors hover:bg-blue-700 flex items-center justify-center gap-2"
+              className="mt-4 w-full rounded-md bg-blue-600 px-4 py-3 text-sm font-bold text-white transition-colors hover:bg-blue-700 flex items-center justify-center gap-2"
             >
               <Ruler size={16} />
-              Edit School Setup
+              Edit School Setup & Formulas
             </button>
           </div>
 
-          <button onClick={onRunAnalysis} disabled={disableRunAnalysis} className="w-full bg-blue-600 text-white py-2.5 rounded-lg font-bold shadow-md hover:bg-blue-700 transition-colors disabled:bg-slate-300 flex items-center justify-center gap-2">
+          <button onClick={onRunAnalysis} disabled={disableRunAnalysis} className="w-full bg-blue-600 text-white py-2.5 rounded-md font-bold shadow-md hover:bg-blue-700 transition-colors disabled:bg-slate-300 flex items-center justify-center gap-2">
             <Waves size={18} /> Update Tank Results
           </button>
         </div>
       </ModuleCard>
 
-      {isInfrastructureOpen && (
+      {isInfrastructureOpen && typeof document !== 'undefined' && createPortal(
         <div
-          className="fixed inset-0 z-[70] bg-slate-100 overflow-y-auto"
+          className="fixed inset-0 overflow-y-auto bg-slate-900/60 backdrop-blur-sm"
+          style={{ zIndex: 99999 }}
           onClick={() => setIsInfrastructureOpen(false)}
         >
           <div
@@ -241,10 +269,10 @@ const DashboardSidebar: React.FC<Props> = ({
             className="min-h-screen w-full bg-white overflow-hidden rounded-none"
             onClick={event => event.stopPropagation()}
           >
-            <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-200 bg-white px-6 py-4">
+            <div className="sticky top-0 z-20 flex items-center justify-between border-b border-slate-200 bg-white px-6 py-4 shadow-sm">
               <div>
-                <h3 id="infrastructure-overlay-title" className="text-xl font-black text-slate-800">Buildings & Daily Water Use</h3>
-                <p className="text-sm text-slate-500">Edit buildings and handwashing needs while previewing the layout.</p>
+                <h3 id="infrastructure-overlay-title" className="text-xl font-black text-slate-800">Buildings, Facilities & Daily Water Demand</h3>
+                <p className="text-sm text-slate-500">Configure buildings, handwashing stations, comfort rooms, and campus population based on global WASH standards.</p>
               </div>
               <button
                 type="button"
@@ -263,6 +291,7 @@ const DashboardSidebar: React.FC<Props> = ({
                 faucetsPerArea={demandConfig.faucetsPerArea}
                 totalRoofArea={totalRoofArea}
                 aggregateDailyDemand={aggregateDailyDemand}
+                demandConfig={demandConfig}
               />
 
               <div className="mt-6">
@@ -278,7 +307,8 @@ const DashboardSidebar: React.FC<Props> = ({
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

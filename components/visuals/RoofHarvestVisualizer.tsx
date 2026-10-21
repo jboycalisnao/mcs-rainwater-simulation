@@ -1,4 +1,4 @@
-﻿
+
 import React, { useMemo } from 'react';
 import { Building } from '../../types';
 
@@ -68,7 +68,7 @@ const RoofHarvestVisualizer: React.FC<Props> = ({
   }, [buildings, analysisScope]);
 
   return (
-    <div className="relative bg-slate-900 rounded-2xl overflow-hidden h-[420px] border border-slate-700 shadow-2xl group">
+    <div className="relative bg-slate-900 rounded-md overflow-hidden h-[420px] border border-slate-700 shadow-2xl group">
       {/* Background Blueprint Grid */}
       <div className="absolute inset-0 opacity-10 pointer-events-none" 
            style={{ 
@@ -212,7 +212,7 @@ const RoofHarvestVisualizer: React.FC<Props> = ({
 
       {/* Dashboard Overlays */}
       <div className="absolute top-6 left-6 flex flex-col gap-4">
-        <div className="bg-slate-900/60 backdrop-blur-xl border border-white/5 p-5 rounded-2xl shadow-2xl">
+        <div className="bg-slate-900/60 backdrop-blur-xl border border-white/5 p-5 rounded-md shadow-2xl">
           <div className="text-[10px] font-black text-blue-400 uppercase tracking-[0.2em] mb-1">Water Collected Now</div>
           <div className="flex items-baseline gap-2">
             <span className="text-4xl font-black text-white tabular-nums tracking-tighter">
@@ -238,7 +238,7 @@ const RoofHarvestVisualizer: React.FC<Props> = ({
         </div>
 
         {isSimulating && (
-          <div className="flex items-center gap-2 bg-blue-500/10 border border-blue-500/20 px-4 py-2 rounded-xl">
+          <div className="flex items-center gap-2 bg-blue-500/10 border border-blue-500/20 px-4 py-2 rounded-md">
             <div className="flex gap-1">
               <span className="h-1 w-1 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0s' }}></span>
               <span className="h-1 w-1 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></span>

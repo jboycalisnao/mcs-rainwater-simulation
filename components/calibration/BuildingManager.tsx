@@ -1,4 +1,4 @@
-﻿
+
 import React from 'react';
 import { Building2, Plus, Trash2, Layout, Maximize } from 'lucide-react';
 import { Building, InflowConfig } from '../../types';
@@ -67,7 +67,7 @@ const BuildingManager: React.FC<Props> = ({ config, onChange }) => {
         {config.buildings.map((building) => (
           <div 
             key={building.id} 
-            className="p-4 bg-white border border-slate-200 rounded-xl shadow-sm hover:border-primary/30 transition-colors relative group"
+            className="p-4 bg-white border border-slate-200 rounded-md shadow-sm hover:border-primary/30 transition-colors relative group"
           >
             <button 
               onClick={() => handleRemoveBuilding(building.id)}
@@ -95,7 +95,7 @@ const BuildingManager: React.FC<Props> = ({ config, onChange }) => {
                   <input 
                     type="number" 
                     min="1"
-                    className="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all" 
+                    className="w-full border border-slate-200 rounded-md px-3 py-2 text-xs font-semibold focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all" 
                     value={building.numberOfClassrooms} 
                     onChange={(e) => handleUpdateBuilding(building.id, { numberOfClassrooms: parseIntegerInput(e.target.value, building.numberOfClassrooms, 1) })} 
                   />
@@ -107,7 +107,7 @@ const BuildingManager: React.FC<Props> = ({ config, onChange }) => {
                   <input 
                     type="number" 
                     min="1"
-                    className="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all" 
+                    className="w-full border border-slate-200 rounded-md px-3 py-2 text-xs font-semibold focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all" 
                     value={building.roofAreaPerClassroom} 
                     onChange={(e) => handleUpdateBuilding(building.id, { roofAreaPerClassroom: parseIntegerInput(e.target.value, building.roofAreaPerClassroom, 1) })} 
                   />
@@ -120,7 +120,7 @@ const BuildingManager: React.FC<Props> = ({ config, onChange }) => {
                 <Maximize size={10} />
                 <span>Total Roof Area</span>
               </div>
-              <span className="text-xs font-black text-primary bg-primary/5 px-2 py-0.5 rounded">
+              <span className="text-xs font-black text-primary bg-primary/5 px-2 py-0.5 rounded-md">
                 {formatNumber(building.numberOfClassrooms * building.roofAreaPerClassroom)} m2
               </span>
             </div>

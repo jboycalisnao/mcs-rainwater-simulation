@@ -23,6 +23,10 @@ export interface DemandConfig {
   handWashingAreas: number;
   faucetsPerArea: number;
   litersPerFaucetDay: number;
+  comfortRooms: number;
+  toiletsPerRoom: number;
+  litersPerToiletDay: number;
+  populationServed: number;
 }
 
 export const useDashboardController = () => {
@@ -46,7 +50,11 @@ export const useDashboardController = () => {
   const [demandConfig, setDemandConfig] = useState<DemandConfig>({
     handWashingAreas: 4,
     faucetsPerArea: 5,
-    litersPerFaucetDay: 50,
+    litersPerFaucetDay: 25,
+    comfortRooms: 4,
+    toiletsPerRoom: 2,
+    litersPerToiletDay: 62.5,
+    populationServed: 450,
   });
   const [selectedTankSize, setSelectedTankSize] = useState(10000);
 
@@ -68,7 +76,8 @@ export const useDashboardController = () => {
   );
 
   const aggregateDailyDemand = useMemo(
-    () => demandConfig.handWashingAreas * demandConfig.faucetsPerArea * demandConfig.litersPerFaucetDay,
+    () => (demandConfig.handWashingAreas * demandConfig.faucetsPerArea * demandConfig.litersPerFaucetDay) +
+          (demandConfig.comfortRooms * demandConfig.toiletsPerRoom * demandConfig.litersPerToiletDay),
     [demandConfig],
   );
 
@@ -217,6 +226,11 @@ export const useDashboardController = () => {
     setActiveParams(result.parameters);
   };
 
+  const loadReportData = (report: SimulationReportJSON) => {
+    setReportData(report);
+    setViewMode('report');
+  };
+
   return {
     viewMode,
     setViewMode,
@@ -253,6 +267,7 @@ export const useDashboardController = () => {
     handleExportReport,
     handleReportUpload,
     handleCalibrationComplete,
+    loadReportData,
     runAnalysis: analysis.runAnalysis,
     simulationResults: analysis.simulationResults,
     playback,
