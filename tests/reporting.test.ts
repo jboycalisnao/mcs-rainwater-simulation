@@ -49,4 +49,30 @@ assert.equal(report.harvest_summary.annual_L, 150);
 assert.equal(report.reliability_table.median_reliability_pct?.['0'], 85);
 assert.equal(report.uncertainty?.runs, 24);
 
+const reportWithDemand = buildSimulationReport({
+  inflowConfig: {
+    buildings: [{ id: '1', name: 'Main', numberOfClassrooms: 2, roofAreaPerClassroom: 50 }],
+    runoffCoefficient: 0.8,
+    gutterEfficiency: 0.9,
+    firstFlushLoss: 1,
+  },
+  rainfallData,
+  reliabilityData,
+  totalDailyDemand: 1000,
+  calibrationResult: null,
+  summary,
+  ensembleRuns: 24,
+  demandConfig: {
+    handWashingAreas: 4,
+    faucetsPerArea: 5,
+    comfortRooms: 4,
+    toiletsPerRoom: 2,
+    populationServed: 450,
+  },
+});
+assert.equal(reportWithDemand.metadata.hand_washing_areas, 4);
+assert.equal(reportWithDemand.metadata.comfort_rooms, 4);
+assert.equal(reportWithDemand.metadata.population_served, 450);
+
 console.log('reporting.test.ts passed');
+

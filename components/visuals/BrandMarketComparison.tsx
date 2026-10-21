@@ -25,7 +25,7 @@ const BrandMarketComparison: React.FC<Props> = ({
   reliabilityMap,
   onSelect,
   selectedSize,
-  recommendedSize = 26500,
+  recommendedSize: propRecommendedSize,
   recommendedReliability,
   dailyDemand = 1000,
 }) => {
@@ -34,12 +34,14 @@ const BrandMarketComparison: React.FC<Props> = ({
     maximumFractionDigits: decimals,
   });
 
+  const recommendedSize = propRecommendedSize ?? recommendedReliability?.tankSize ?? 10000;
   const selectedRel = reliabilityMap[selectedSize];
   const recRel = recommendedReliability || reliabilityMap[recommendedSize];
   const isSmallerThanRecommended = selectedSize < recommendedSize;
-  const tanksNeeded = Math.ceil(recommendedSize / selectedSize);
+  const tanksNeeded = Math.max(1, Math.ceil(recommendedSize / selectedSize));
   const selectedBufferDays = Math.round(selectedSize / Math.max(1, dailyDemand));
   const recommendedBufferDays = Math.round(recommendedSize / Math.max(1, dailyDemand));
+  const recMedianPct = recRel?.medianReliability ?? (selectedRel ? selectedRel.medianReliability + 5 : 80);
 
   return (
     <div className="bg-white rounded-md border border-slate-200 shadow-sm overflow-hidden mt-6">
@@ -143,7 +145,7 @@ const BrandMarketComparison: React.FC<Props> = ({
                   <div className="flex items-start gap-2 text-slate-600">
                     <AlertTriangle size={15} className="text-amber-500 shrink-0 mt-0.5" />
                     <span>
-                      <strong>Implication of this single tank:</strong> The recommended size is <strong>{formatNumber(recommendedSize / 1000, 1)} kL</strong> (which provides ~{recRel?.medianReliability.toFixed(1) ?? '80.7'}% reliability and {recommendedBufferDays} days of dry buffer). A single {formatNumber(selectedSize)} L tank drops your dry reserve to only <strong>{selectedBufferDays} school days</strong>, leaving a {( (recRel?.medianReliability ?? 80.7) - selectedRel.medianReliability ).toFixed(1)}% coverage gap. Heavy downpours will also overflow quickly and waste water.
+                      <strong>Implication of this single tank:</strong> The recommended size is <strong>{formatNumber(recommendedSize / 1000, 1)} kL</strong> (which provides ~{recMedianPct.toFixed(1)}% reliability and {recommendedBufferDays} days of dry buffer). A single {formatNumber(selectedSize)} L tank drops your dry reserve to only <strong>{selectedBufferDays} school days</strong>, leaving a {Math.max(0, recMedianPct - selectedRel.medianReliability).toFixed(1)}% coverage gap. Heavy downpours will also overflow quickly and waste water.
                     </span>
                   </div>
 
@@ -162,11 +164,11 @@ const BrandMarketComparison: React.FC<Props> = ({
                       </div>
                       <div className="bg-slate-50 border border-slate-200 rounded-md p-2">
                         <div className="font-bold text-slate-700">2 Tanks ({formatNumber((selectedSize * 2) / 1000, 1)} kL)</div>
-                        <div className="text-slate-500">~{reliabilityMap[selectedSize * 2]?.medianReliability.toFixed(1) ?? '77.8'}% typical ({selectedBufferDays * 2} days buffer)</div>
+                        <div className="text-slate-500">~{(reliabilityMap[selectedSize * 2]?.medianReliability ?? Math.min(99, selectedRel.medianReliability * 1.12)).toFixed(1)}% typical ({selectedBufferDays * 2} days buffer)</div>
                       </div>
                       <div className="bg-blue-50 border border-blue-300 rounded-md p-2 font-semibold">
                         <div className="text-[#0053DF]">{tanksNeeded} Tanks ({formatNumber((selectedSize * tanksNeeded) / 1000, 1)} kL)</div>
-                        <div className="text-blue-700">~{reliabilityMap[selectedSize * tanksNeeded]?.medianReliability.toFixed(1) ?? '82.0'}% typical (Full Goal Met)</div>
+                        <div className="text-blue-700">~{(reliabilityMap[selectedSize * tanksNeeded]?.medianReliability ?? recMedianPct).toFixed(1)}% typical (Full Goal Met)</div>
                       </div>
                     </div>
                   </div>

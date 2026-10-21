@@ -12,6 +12,8 @@
     "constants.ts",
     "types.ts",
     "services/**/*.ts",
+    "features/**/*.ts",
+    "utils/**/*.ts",
     "tests/**/*.ts"
   ]
 }

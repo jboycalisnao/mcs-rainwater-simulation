@@ -1,4 +1,7 @@
 import { InflowConfig, ReliabilityIntervalResult, SummaryData } from '../types';
+import { selectRecommendedTank } from './tankSizing';
+
+export { selectRecommendedTank };
 
 export interface ResearchSummary {
   problemStatement: string[];
@@ -18,14 +21,6 @@ const formatNumber = (value: number, decimals = 0) => value.toLocaleString(undef
   minimumFractionDigits: decimals,
   maximumFractionDigits: decimals,
 });
-
-export const selectRecommendedTank = (results: ReliabilityIntervalResult[]) => (
-  results.find(result => result.conservativeReliability >= 90)
-  ?? results.find(result => result.conservativeReliability >= 80)
-  ?? results[Math.floor(results.length / 2)]
-  ?? results[0]
-  ?? null
-);
 
 export const buildResearchSummary = ({
   inflowConfig,

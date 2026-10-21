@@ -1,4 +1,4 @@
-import { MonthlyParameters } from './types';
+import { Building, MonthlyParameters } from './types';
 
 export const COLORS = {
   primary: '#0053DF',
@@ -10,6 +10,11 @@ export const DEFAULT_ENSEMBLE_RUNS = 24;
 export const CONSERVATIVE_RELIABILITY_PERCENTILE = 0.1;
 export const MIN_WET_DAYS_FOR_CALIBRATION = 3;
 export const MIN_TRANSITIONS_FOR_CALIBRATION = 10;
+
+export const DEFAULT_BUILDINGS: Building[] = [
+  { id: '1', name: 'Main Academic Building', numberOfClassrooms: 6, roofAreaPerClassroom: 63 },
+  { id: '2', name: 'Science & Senior High Wing', numberOfClassrooms: 4, roofAreaPerClassroom: 63 },
+];
 
 export const TANK_BRANDS = [
   {

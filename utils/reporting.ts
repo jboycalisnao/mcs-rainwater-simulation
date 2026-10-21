@@ -2,6 +2,7 @@ import { CONSERVATIVE_RELIABILITY_PERCENTILE } from '../constants';
 import { CalibrationResult, InflowConfig, RainfallDataRow, ReliabilityIntervalResult, ReportCoverDetails, SimulationReportJSON, SummaryData } from '../types';
 import { ResearchSummary } from './researchSummary';
 import { summarizeRainfallSeries } from './summary';
+import { selectRecommendedTank } from './tankSizing';
 
 export const buildSimulationReport = ({
   inflowConfig,
@@ -11,6 +12,7 @@ export const buildSimulationReport = ({
   calibrationResult,
   summary,
   ensembleRuns,
+  demandConfig,
 }: {
   inflowConfig: InflowConfig;
   rainfallData: (RainfallDataRow & { inflow_liters?: number })[];
@@ -19,6 +21,13 @@ export const buildSimulationReport = ({
   calibrationResult: CalibrationResult | null;
   summary?: SummaryData;
   ensembleRuns: number;
+  demandConfig?: {
+    handWashingAreas?: number;
+    faucetsPerArea?: number;
+    comfortRooms?: number;
+    toiletsPerRoom?: number;
+    populationServed?: number;
+  };
 }): SimulationReportJSON => {
   const totalClassrooms = inflowConfig.buildings.reduce((sum, building) => sum + building.numberOfClassrooms, 0);
   const totalRoofArea = inflowConfig.buildings.reduce(
@@ -47,6 +56,11 @@ export const buildSimulationReport = ({
       number_of_classrooms: totalClassrooms,
       total_daily_demand_L: Number(totalDailyDemand.toFixed(2)),
       simulation_years: resolvedSummary.simulationYears,
+      hand_washing_areas: demandConfig?.handWashingAreas,
+      faucets_per_area: demandConfig?.faucetsPerArea,
+      comfort_rooms: demandConfig?.comfortRooms,
+      toilets_per_room: demandConfig?.toiletsPerRoom,
+      population_served: demandConfig?.populationServed,
     },
     harvest_summary: {
       annual_L: Number(resolvedSummary.annualInflow.toFixed(2)),
@@ -120,26 +134,128 @@ const getReliabilityRows = (report: SimulationReportJSON) => Object.keys(report.
   }))
   .sort((a, b) => a.tank - b.tank);
 
+const openPrintReportWindow = (html: string, filename: string) => {
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+  const blobUrl = URL.createObjectURL(blob);
+
+  let reportWindow: Window | null = null;
+  try {
+    reportWindow = window.open(blobUrl, '_blank', 'width=1100,height=850,menubar=yes,toolbar=yes');
+  } catch (err) {
+    console.warn('window.open encountered error:', err);
+  }
+
+  if (!reportWindow || reportWindow.closed || typeof reportWindow.closed === 'undefined') {
+    // 1. Invisible print iframe fallback to trigger native print dialog directly
+    const printFrame = document.createElement('iframe');
+    printFrame.style.position = 'fixed';
+    printFrame.style.top = '-9999px';
+    printFrame.style.left = '-9999px';
+    printFrame.style.width = '1px';
+    printFrame.style.height = '1px';
+    printFrame.style.opacity = '0';
+    printFrame.src = blobUrl;
+    document.body.appendChild(printFrame);
+
+    printFrame.onload = () => {
+      setTimeout(() => {
+        try {
+          printFrame.contentWindow?.focus();
+          printFrame.contentWindow?.print();
+        } catch (e) {
+          console.warn('Iframe print error:', e);
+        }
+      }, 350);
+    };
+
+    // 2. In-page toast notification with direct link in case popups were blocked
+    const existingNotice = document.getElementById('report-popup-notice');
+    existingNotice?.remove();
+
+    const notice = document.createElement('div');
+    notice.id = 'report-popup-notice';
+    notice.style.position = 'fixed';
+    notice.style.bottom = '24px';
+    notice.style.right = '24px';
+    notice.style.zIndex = '999999';
+    notice.style.backgroundColor = '#0053DF';
+    notice.style.color = 'white';
+    notice.style.padding = '16px 20px';
+    notice.style.borderRadius = '8px';
+    notice.style.boxShadow = '0 12px 30px rgba(0,0,0,0.25)';
+    notice.style.fontFamily = 'Inter, Arial, sans-serif';
+    notice.style.fontSize = '13px';
+    notice.style.maxWidth = '420px';
+    notice.style.display = 'flex';
+    notice.style.flexDirection = 'column';
+    notice.style.gap = '8px';
+    notice.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <strong style="font-size:14px;display:flex;align-items:center;gap:6px;">
+          <span>📄</span> Report Generated Successfully
+        </strong>
+        <button id="close-report-notice" style="background:transparent;border:0;color:white;cursor:pointer;font-size:18px;line-height:1;">&times;</button>
+      </div>
+      <p style="margin:0;opacity:0.9;line-height:1.4;">
+        If your browser blocked opening a new window, click below to open your report:
+      </p>
+      <div style="display:flex;gap:8px;margin-top:4px;">
+        <a href="${blobUrl}" target="_blank" style="background:#ca080b;color:white;padding:8px 14px;border-radius:6px;text-decoration:none;font-weight:bold;display:inline-block;text-align:center;">
+          Open Report Tab
+        </a>
+      </div>
+    `;
+
+    document.body.appendChild(notice);
+    document.getElementById('close-report-notice')?.addEventListener('click', () => notice.remove());
+    setTimeout(() => notice.remove(), 15000);
+  }
+};
+
 export const downloadPdfReport = (
   report: SimulationReportJSON,
   cover: ReportCoverDetails,
   filename: string,
+  demandConfig?: {
+    handWashingAreas?: number;
+    faucetsPerArea?: number;
+    comfortRooms?: number;
+    toiletsPerRoom?: number;
+    populationServed?: number;
+  },
 ) => {
   const reliabilityRows = getReliabilityRows(report);
-  const recommended = reliabilityRows.find(row => row.cautious >= 90) ?? reliabilityRows[Math.floor(reliabilityRows.length / 2)] ?? reliabilityRows[0];
+  const reliabilityIntervals: ReliabilityIntervalResult[] = reliabilityRows.map(row => ({
+    tankSize: row.tank,
+    reliability: row.cautious,
+    conservativeReliability: row.cautious,
+    medianReliability: row.typical,
+    optimisticReliability: row.best,
+    reliabilitySpread: [row.cautious, row.best],
+    droughtDaysRange: [0, 0],
+    totalInflowRange: [0, 0],
+    droughtDays: 0,
+    totalInflow: 0,
+    totalDemand: report.metadata.total_daily_demand_L,
+    sampleCount: report.uncertainty?.runs ?? 1,
+  }));
+  const optimalTank = selectRecommendedTank(reliabilityIntervals);
+  const recommended = optimalTank
+    ? { tank: optimalTank.tankSize, cautious: optimalTank.conservativeReliability, typical: optimalTank.medianReliability, best: optimalTank.optimisticReliability }
+    : reliabilityRows[0];
   const monthlyRows = Object.entries(report.harvest_summary.monthly_L)
     .slice(0, 12)
     .map(([month, liters]) => ({ month, liters }));
   const safeFilename = filename.replace(/\.pdf$/i, '');
-  const reportWindow = window.open('', '_blank', 'width=1100,height=850');
-
-  if (!reportWindow) {
-    alert('The report window was blocked. Please allow pop-ups for this site, then export again.');
-    return;
-  }
-
   const assumptions = report.assumptions ?? [];
   const visibleReliabilityRows = reliabilityRows.slice(0, 18);
+  const washAreas = demandConfig?.handWashingAreas ?? report.metadata.hand_washing_areas ?? 4;
+  const washFaucets = demandConfig?.faucetsPerArea ?? report.metadata.faucets_per_area ?? 5;
+  const crRooms = demandConfig?.comfortRooms ?? report.metadata.comfort_rooms ?? 4;
+  const crToilets = demandConfig?.toiletsPerRoom ?? report.metadata.toilets_per_room ?? 2;
+  const population = demandConfig?.populationServed ?? report.metadata.population_served ?? 450;
+  const perPersonDaily = population > 0 ? (report.metadata.total_daily_demand_L / population) : 0;
+
   const html = `<!doctype html>
 <html lang="en">
 <head>
@@ -353,11 +469,18 @@ export const downloadPdfReport = (
 </head>
 <body>
   <div class="toolbar">
-    <div>
-      <strong>PDF Preview</strong>
-      <span style="opacity:.75;margin-left:8px;">Review the layout, then download as PDF.</span>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <span style="font-weight:900;font-size:15px;">MCS Rainwater Harvesting</span>
+      <span style="opacity:0.8;font-size:12px;">| Print Preview (Select <strong>"Save as PDF"</strong> in print dialog destination)</span>
     </div>
-    <button onclick="window.print()">Download as PDF</button>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <button onclick="window.print()" style="background:#ca080b;color:white;border:0;padding:8px 16px;border-radius:6px;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;gap:6px;">
+        🖨️ Print / Save as PDF
+      </button>
+      <button onclick="window.close()" style="background:rgba(255,255,255,0.18);color:white;border:0;padding:8px 12px;border-radius:6px;font-weight:600;cursor:pointer;">
+        Close
+      </button>
+    </div>
   </div>
 
   <main class="report">
@@ -402,7 +525,31 @@ export const downloadPdfReport = (
         </div>
       </div>
 
-      <div class="grid two" style="margin-top:16px;">
+      <div class="card" style="margin-top:14px;">
+        <h3>Water Facilities & Campus Population</h3>
+        <div class="grid three">
+          <div class="card soft compact-card">
+            <div class="metric-label">Handwashing</div>
+            <div class="metric-value" style="font-size:16px;">${washAreas * washFaucets} faucets</div>
+            <p class="muted" style="font-size:10px;margin-top:4px;">${washAreas} stations · 500 L/day</p>
+          </div>
+          <div class="card soft compact-card">
+            <div class="metric-label">Comfort Rooms (CRs)</div>
+            <div class="metric-value" style="font-size:16px;">${crRooms * crToilets} toilets</div>
+            <p class="muted" style="font-size:10px;margin-top:4px;">${crRooms} CR blocks · 500 L/day</p>
+          </div>
+          <div class="card soft compact-card">
+            <div class="metric-label">Population Served</div>
+            <div class="metric-value" style="font-size:16px;">${population} people</div>
+            <p class="muted" style="font-size:10px;margin-top:4px;">~${perPersonDaily.toFixed(2)} L/person/day</p>
+          </div>
+        </div>
+        <div class="note" style="margin-top:10px;font-size:11px;">
+          <strong>Institutional Benchmarks:</strong> Grounded in DepEd WinS Order No. 10 s.2016 and WHO/UNICEF WASH in Schools Guidelines (1.5–5.0 L/person/day for day schools).
+        </div>
+      </div>
+
+      <div class="grid two" style="margin-top:14px;">
         <div class="card">
           <h3>Water Collected</h3>
           <div class="metric-value">${formatNumber(report.harvest_summary.annual_L)} L</div>
@@ -415,13 +562,13 @@ export const downloadPdfReport = (
         </div>
       </div>
 
-      <div class="card" style="margin-top:16px;">
+      <div class="card" style="margin-top:14px;">
         <h3>Monthly Water Collected</h3>
         <div class="grid three">
           ${monthlyRows.map(row => `
             <div class="card soft compact-card">
               <div class="metric-label">Month ${sanitizeHtml(row.month)}</div>
-              <div class="metric-value" style="font-size:16px;">${formatNumber(row.liters)} L</div>
+              <div class="metric-value" style="font-size:15px;">${formatNumber(row.liters)} L</div>
             </div>
           `).join('')}
         </div>
@@ -467,16 +614,26 @@ export const downloadPdfReport = (
 
   <script>
     document.title = ${JSON.stringify(safeFilename)};
-    window.addEventListener('load', () => {
-      setTimeout(() => window.print(), 350);
-    });
+    function triggerPrintDialog() {
+      try {
+        window.focus();
+        window.print();
+      } catch (err) {
+        console.warn('Auto print deferred:', err);
+      }
+    }
+    if (document.readyState === 'complete') {
+      setTimeout(triggerPrintDialog, 400);
+    } else {
+      window.addEventListener('DOMContentLoaded', () => setTimeout(triggerPrintDialog, 400));
+      window.addEventListener('load', () => setTimeout(triggerPrintDialog, 400));
+      setTimeout(triggerPrintDialog, 800);
+    }
   </script>
 </body>
 </html>`;
 
-  reportWindow.document.open();
-  reportWindow.document.write(html);
-  reportWindow.document.close();
+  openPrintReportWindow(html, filename);
 };
 
 export const downloadResearchPdfReport = (
@@ -493,12 +650,6 @@ export const downloadResearchPdfReport = (
   const maxMonthly = Math.max(...monthlyRows.map(row => row.liters), 1);
   const maxReliability = Math.max(...visibleReliabilityRows.map(row => row.cautious), 1);
   const safeFilename = filename.replace(/\.pdf$/i, '');
-  const reportWindow = window.open('', '_blank', 'width=1100,height=850');
-
-  if (!reportWindow) {
-    alert('The report window was blocked. Please allow pop-ups for this site, then export again.');
-    return;
-  }
 
   const renderList = (items: string[]) => `<ul>${items.map(item => `<li>${sanitizeHtml(item)}</li>`).join('')}</ul>`;
   const html = `<!doctype html>
@@ -717,11 +868,18 @@ export const downloadResearchPdfReport = (
 </head>
 <body>
   <div class="toolbar">
-    <div>
-      <strong>Research PDF Preview</strong>
-      <span style="opacity:.75;margin-left:8px;">Review the research report, then download as PDF.</span>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <span style="font-weight:900;font-size:15px;">MCS Rainwater Research</span>
+      <span style="opacity:0.8;font-size:12px;">| Print Preview (Select <strong>"Save as PDF"</strong> in print dialog destination)</span>
     </div>
-    <button onclick="window.print()">Download as PDF</button>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <button onclick="window.print()" style="background:#ca080b;color:white;border:0;padding:8px 16px;border-radius:6px;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;gap:6px;">
+        🖨️ Print / Save as PDF
+      </button>
+      <button onclick="window.close()" style="background:rgba(255,255,255,0.18);color:white;border:0;padding:8px 12px;border-radius:6px;font-weight:600;cursor:pointer;">
+        Close
+      </button>
+    </div>
   </div>
 
   <main class="report">
@@ -843,14 +1001,24 @@ export const downloadResearchPdfReport = (
 
   <script>
     document.title = ${JSON.stringify(safeFilename)};
-    window.addEventListener('load', () => {
-      setTimeout(() => window.print(), 350);
-    });
+    function triggerPrintDialog() {
+      try {
+        window.focus();
+        window.print();
+      } catch (err) {
+        console.warn('Auto print deferred:', err);
+      }
+    }
+    if (document.readyState === 'complete') {
+      setTimeout(triggerPrintDialog, 400);
+    } else {
+      window.addEventListener('DOMContentLoaded', () => setTimeout(triggerPrintDialog, 400));
+      window.addEventListener('load', () => setTimeout(triggerPrintDialog, 400));
+      setTimeout(triggerPrintDialog, 800);
+    }
   </script>
 </body>
 </html>`;
 
-  reportWindow.document.open();
-  reportWindow.document.write(html);
-  reportWindow.document.close();
+  openPrintReportWindow(html, filename);
 };

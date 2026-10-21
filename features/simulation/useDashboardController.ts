@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import type { ChangeEvent } from 'react';
-import { DEFAULT_ENSEMBLE_RUNS, DEFAULT_MONTHLY_PARAMS, MONTH_NAMES } from '../../constants';
+import { DEFAULT_BUILDINGS, DEFAULT_ENSEMBLE_RUNS, DEFAULT_MONTHLY_PARAMS, MONTH_NAMES } from '../../constants';
 import { useRainwaterAnalysis } from '../../hooks/useRainwaterAnalysis';
 import { useSimulationPlayback } from '../../hooks/useSimulationPlayback';
 import { RainfallEngine } from '../../services/rainfallEngine';
@@ -37,11 +37,23 @@ export const useDashboardController = () => {
   const [activeParams, setActiveParams] = useState<MonthlyParameters[]>(DEFAULT_MONTHLY_PARAMS);
   const [genYears, setGenYears] = useState(10);
   const [genSeed, setGenSeed] = useState(() => Math.floor(Math.random() * 900000) + 100000);
-  const [rainfallData, setRainfallData] = useState<RainfallDataRow[]>([]);
-  const [rainfallEnsemble, setRainfallEnsemble] = useState<RainfallDataRow[][]>([]);
+  const [rainfallEnsemble, setRainfallEnsemble] = useState<RainfallDataRow[][]>(() => {
+    try {
+      return RainfallEngine.generateEnsemble(DEFAULT_MONTHLY_PARAMS, 10, 543210, DEFAULT_ENSEMBLE_RUNS);
+    } catch {
+      return [];
+    }
+  });
+  const [rainfallData, setRainfallData] = useState<RainfallDataRow[]>(() => {
+    try {
+      return RainfallEngine.generateEnsemble(DEFAULT_MONTHLY_PARAMS, 10, 543210, 1)[0] ?? [];
+    } catch {
+      return [];
+    }
+  });
   const [isGenerating, setIsGenerating] = useState(false);
   const [inflowConfig, setInflowConfig] = useState<InflowConfig>({
-    buildings: [{ id: '1', name: 'Main Wing', numberOfClassrooms: 10, roofAreaPerClassroom: 63 }],
+    buildings: DEFAULT_BUILDINGS,
     runoffCoefficient: 0.85,
     gutterEfficiency: 0.9,
     firstFlushLoss: 0.5,
@@ -196,9 +208,10 @@ export const useDashboardController = () => {
           calibrationResult,
           summary: liveSummary,
           ensembleRuns: rainfallEnsemble.length || DEFAULT_ENSEMBLE_RUNS,
+          demandConfig,
         });
 
-    downloadPdfReport(report, coverDetails, `rainwater-harvesting-report-${Date.now()}.pdf`);
+    downloadPdfReport(report, coverDetails, `rainwater-harvesting-report-${Date.now()}.pdf`, demandConfig);
   };
 
   const handleReportUpload = (event: ChangeEvent<HTMLInputElement>) => {

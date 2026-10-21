@@ -46,13 +46,21 @@ const ExportReportModal: React.FC<Props> = ({ isOpen, onClose, onGenerate, mode 
 
   return (
     <div
-      className="fixed inset-0 flex items-center justify-center bg-slate-950/60 px-4"
+      className="fixed inset-0 flex items-center justify-center bg-slate-950/60 px-4 overflow-y-auto py-6"
       style={{ zIndex: 99999 }}
-      onClick={onClose}
+      onClick={event => {
+        if (event.target === event.currentTarget) {
+          onClose();
+        }
+      }}
     >
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-2xl overflow-hidden rounded-md border border-slate-200 bg-white shadow-2xl"
+        onClick={event => event.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="export-modal-title"
+        className="w-full max-w-2xl overflow-hidden rounded-md border border-slate-200 bg-white shadow-2xl my-auto"
       >
         <div className="flex items-start justify-between border-b border-slate-200 bg-slate-50 px-6 py-5">
           <div className="flex items-start gap-3">
@@ -60,7 +68,7 @@ const ExportReportModal: React.FC<Props> = ({ isOpen, onClose, onGenerate, mode 
               <FileText size={20} />
             </div>
             <div>
-              <h2 className="text-lg font-black text-slate-900">{resolvedMode === 'research' ? 'Export Research Report' : 'Export PDF Report'}</h2>
+              <h2 id="export-modal-title" className="text-lg font-black text-slate-900">{resolvedMode === 'research' ? 'Export Research Report' : 'Export PDF Report'}</h2>
               <p className="mt-1 text-sm text-slate-500">
                 {resolvedMode === 'research'
                   ? 'Add cover details before generating the research-format PDF.'
@@ -141,20 +149,26 @@ const ExportReportModal: React.FC<Props> = ({ isOpen, onClose, onGenerate, mode 
           </label>
         </div>
 
-        <div className="flex justify-end gap-3 border-t border-slate-200 bg-slate-50 px-6 py-4">
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            className="rounded-md bg-secondary px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-red-700"
-          >
-            {resolvedMode === 'research' ? 'Generate Research PDF' : 'Generate PDF'}
-          </button>
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-200 bg-slate-50 px-6 py-4">
+          <div className="text-[11px] text-slate-500 text-left">
+            <strong>Print tip:</strong> Select <strong>"Save as PDF"</strong> as the destination in your browser print window.
+          </div>
+          <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="rounded-md bg-secondary px-5 py-2 text-sm font-bold text-white transition-colors hover:bg-red-700 flex items-center gap-2 shadow-sm"
+            >
+              <FileText size={16} />
+              {resolvedMode === 'research' ? 'Generate Research PDF' : 'Generate PDF'}
+            </button>
+          </div>
         </div>
       </form>
     </div>

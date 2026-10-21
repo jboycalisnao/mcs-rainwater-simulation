@@ -11,6 +11,7 @@ interface ResearchSummaryPageProps {
   ensembleRuns: number;
   summary: SummaryData | null;
   results: ReliabilityIntervalResult[];
+  onExportResearchPdf?: () => void;
 }
 
 const ResearchBlock: React.FC<{
@@ -41,6 +42,7 @@ const ResearchSummaryPage: React.FC<ResearchSummaryPageProps> = ({
   ensembleRuns,
   summary,
   results,
+  onExportResearchPdf,
 }) => {
   if (results.length === 0 || !summary) return null;
 
@@ -68,12 +70,24 @@ const ResearchSummaryPage: React.FC<ResearchSummaryPageProps> = ({
             </p>
           </div>
         </div>
-        {research.recommendedTank && (
-          <div className="border border-slate-200 bg-slate-50 px-4 py-3 text-sm rounded-md">
-            <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">Recommended Tank</div>
-            <div className="mt-1 font-black text-slate-900">{research.recommendedTank.tankSize.toLocaleString()} L</div>
-          </div>
-        )}
+        <div className="flex flex-wrap items-center gap-3">
+          {onExportResearchPdf && (
+            <button
+              type="button"
+              onClick={onExportResearchPdf}
+              className="flex items-center gap-2 bg-[#0053DF] hover:bg-blue-700 text-white px-3.5 py-2.5 rounded-md text-xs font-bold shadow-sm transition-colors"
+              title="Download print-ready MCS research PDF"
+            >
+              <FileText size={15} /> Export Research PDF
+            </button>
+          )}
+          {research.recommendedTank && (
+            <div className="border border-slate-200 bg-slate-50 px-4 py-2 text-sm rounded-md">
+              <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">Recommended Tank</div>
+              <div className="mt-0.5 font-black text-slate-900">{research.recommendedTank.tankSize.toLocaleString()} L</div>
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="mt-5 grid grid-cols-1 gap-4 lg:grid-cols-2">

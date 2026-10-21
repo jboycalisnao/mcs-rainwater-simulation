@@ -181,6 +181,9 @@ export interface SimulationReportJSON {
     simulation_years: number;
     hand_washing_areas?: number;
     faucets_per_area?: number;
+    comfort_rooms?: number;
+    toilets_per_room?: number;
+    population_served?: number;
   };
   harvest_summary: {
     annual_L: number;

@@ -31,6 +31,7 @@ import {
   ReliabilityIntervalResult,
   SummaryData,
 } from '../../types';
+import { selectRecommendedTank } from '../../utils/tankSizing';
 import { DemandConfig } from './useDashboardController';
 
 interface PlaybackState {
@@ -60,6 +61,7 @@ interface Props {
   visibleBrandMap: Record<number, ReliabilityIntervalResult>;
   currentReliability: ReliabilityIntervalResult | null;
   viewMode: 'live' | 'report';
+  onExportResearchPdf?: () => void;
 }
 
 const DashboardResults: React.FC<Props> = ({
@@ -82,6 +84,7 @@ const DashboardResults: React.FC<Props> = ({
   visibleBrandMap,
   currentReliability,
   viewMode,
+  onExportResearchPdf,
 }) => {
   const formatNumber = (value: number, decimals = 0) => value.toLocaleString(undefined, {
     minimumFractionDigits: decimals,
@@ -126,14 +129,14 @@ const DashboardResults: React.FC<Props> = ({
           </div>
           <TankOptionCards results={visibleResults} currentSelected={selectedTankSize} onSelect={setSelectedTankSize} buildings={inflowConfig.buildings} hideBreakdown={analysisScope !== 'school'} />
           {(() => {
-            const optimalResult = visibleResults.find(result => result.conservativeReliability >= 90) || visibleResults[Math.floor(visibleResults.length / 2)];
+            const optimalResult = selectRecommendedTank(visibleResults);
             return (
               <BrandMarketComparison
                 reliabilityMap={visibleBrandMap}
                 onSelect={setSelectedTankSize}
                 selectedSize={selectedTankSize}
                 recommendedSize={optimalResult?.tankSize}
-                recommendedReliability={optimalResult}
+                recommendedReliability={optimalResult ?? undefined}
                 dailyDemand={scopedDailyDemand}
               />
             );
@@ -155,6 +158,7 @@ const DashboardResults: React.FC<Props> = ({
                 ensembleRuns={ensembleRuns}
                 summary={visibleSummary}
                 results={visibleResults}
+                onExportResearchPdf={onExportResearchPdf}
               />
             </>
           )}

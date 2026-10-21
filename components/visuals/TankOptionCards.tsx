@@ -11,6 +11,7 @@ import {
   Wallet,
 } from 'lucide-react';
 import { Building, ReliabilityIntervalResult } from '../../types';
+import { getCommercialCombo, selectTankRecommendations } from '../../utils/tankSizing';
 
 interface Props {
   results: ReliabilityIntervalResult[];
@@ -31,9 +32,10 @@ const TankOptionCards: React.FC<Props> = ({ results, onSelect, currentSelected, 
   });
 
   const totalArea = buildings.reduce((sum, building) => sum + (building.numberOfClassrooms * building.roofAreaPerClassroom), 0);
-  const budget = results.find(result => result.conservativeReliability >= 75) || results[0];
-  const optimal = results.find(result => result.conservativeReliability >= 90) || results[Math.floor(results.length / 2)];
-  const resilient = results.find(result => result.conservativeReliability >= 98) || results[results.length - 1];
+  const recommendations = selectTankRecommendations(results);
+  const budget = recommendations?.budget ?? results[0];
+  const optimal = recommendations?.optimal ?? results[0];
+  const resilient = recommendations?.resilient ?? results[results.length - 1];
 
   const options = [
     {
@@ -66,6 +68,7 @@ const TankOptionCards: React.FC<Props> = ({ results, onSelect, currentSelected, 
   const optimalKl = optimal.tankSize / 1000;
   const isLargeTank = optimal.tankSize > 10000;
   const parallelTenKlCount = Math.ceil(optimal.tankSize / 10000);
+  const commercialCombo = getCommercialCombo(optimal.tankSize);
 
   return (
     <div className="space-y-6">
@@ -139,7 +142,7 @@ const TankOptionCards: React.FC<Props> = ({ results, onSelect, currentSelected, 
             <div className="bg-white border border-slate-200 rounded-md p-3 text-[11px] space-y-1">
               <div className="font-bold text-slate-800">For Example (e.g., {formatNumber(optimal.medianReliability, 1)}% Typical Reliability):</div>
               <p className="text-slate-600">
-                Out of 100 school days, students have full rainwater for handwashing on approximately <strong>{Math.round(optimal.medianReliability)} days</strong>. On the remaining <strong>{100 - Math.round(optimal.medianReliability)} days</strong>, the tank will be empty or insufficient, requiring auxiliary water (tap or well).
+                Out of 100 school days, students have full rainwater for handwashing and sanitation on approximately <strong>{Math.round(optimal.medianReliability)} days</strong>. On the remaining <strong>{100 - Math.round(optimal.medianReliability)} days</strong>, the tank will be empty or insufficient, requiring auxiliary water (tap or well).
               </p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-[11px]">
@@ -185,23 +188,25 @@ const TankOptionCards: React.FC<Props> = ({ results, onSelect, currentSelected, 
                   <div className="text-[10px] font-bold uppercase text-slate-400">Target Setup (Recommended)</div>
                   <div className="text-base font-black text-[#0053DF] mt-1">{parallelTenKlCount} × 10,000 L Tanks</div>
                   <div className="text-[11px] text-slate-500 mt-1">
-                    Total: {formatNumber(parallelTenKlCount * 10, 1)} kL capacity. Fully achieves the {formatNumber(optimalKl, 1)} kL target with ~{Math.min(90, Math.round(optimal.medianReliability + 2))}% typical reliability.
+                    Total: {formatNumber(parallelTenKlCount * 10, 1)} kL capacity. Fully achieves the {formatNumber(optimalKl, 1)} kL target with ~{Math.min(99, Math.round(optimal.medianReliability + 1))}% typical reliability.
                   </div>
                 </div>
 
                 <div className="bg-white border border-blue-200 rounded-md p-3">
                   <div className="text-[10px] font-bold uppercase text-slate-400">Exact Match Combo</div>
-                  <div className="text-base font-black text-slate-800 mt-1">2 × 10 kL + 1 × 6 kL</div>
+                  <div className="text-base font-black text-slate-800 mt-1">{commercialCombo.text}</div>
                   <div className="text-[11px] text-slate-500 mt-1">
-                    Total: 26.0 kL capacity. Matches the recommended {formatNumber(optimalKl, 1)} kL closely using standard catalog sizes.
+                    Total: {formatNumber(commercialCombo.totalKl, 1)} kL capacity. Matches the recommended {formatNumber(optimalKl, 1)} kL closely using standard catalog sizes.
                   </div>
                 </div>
 
                 <div className="bg-white border border-blue-200 rounded-md p-3">
                   <div className="text-[10px] font-bold uppercase text-slate-400">Phased Starter Option</div>
-                  <div className="text-base font-black text-slate-800 mt-1">1 or 2 × 10 kL Tanks</div>
+                  <div className="text-base font-black text-slate-800 mt-1">
+                    {budget.tankSize < optimal.tankSize ? `1 × ${formatNumber(budget.tankSize / 1000, 1)} kL Starter Tank` : '1 × 10 kL Starter Tank'}
+                  </div>
                   <div className="text-[11px] text-slate-500 mt-1">
-                    Buy 1 tank first (~69% coverage) or 2 tanks (~78% coverage), then add additional tanks when PTA or school budget permits.
+                    Buy 1 tank first (~{formatNumber(budget.medianReliability, 0)}% coverage), then add additional tanks when PTA or school budget permits.
                   </div>
                 </div>
               </div>

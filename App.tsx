@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Calculator, FileJson, HelpCircle, MapPin, TrendingUp, Upload } from 'lucide-react';
+import { BookOpen, Calculator, FileJson, FileText, HelpCircle, MapPin, TrendingUp, Upload } from 'lucide-react';
 import SimulationInfoPage from './components/information/SimulationInfoPage';
 import ExportReportModal from './components/report/ExportReportModal';
 import ImportDataModal from './components/report/ImportDataModal';
@@ -25,6 +25,9 @@ const App: React.FC = () => {
 
   const canExportResults = dashboard.viewMode === 'report' || (dashboard.rainfallData.length > 0 && dashboard.simulationResults.length > 0);
   const openExportModal = (mode: 'dashboard' | 'research') => {
+    if (dashboard.rainfallData.length === 0) {
+      dashboard.handleGenerateRainfall();
+    }
     setExportMode(mode);
     setIsExportModalOpen(true);
   };
@@ -39,6 +42,7 @@ const App: React.FC = () => {
       calibrationResult: dashboard.calibrationResult,
       summary: dashboard.visibleSummary ?? undefined,
       ensembleRuns: dashboard.rainfallEnsemble.length || dashboard.defaultEnsembleRuns,
+      demandConfig: dashboard.demandConfig,
     });
 
     const research = buildResearchSummary({
@@ -80,11 +84,24 @@ const App: React.FC = () => {
             >
               <Upload size={16} /> <span className="hidden sm:inline">Import Rainfall Data</span><span className="sm:hidden">Import</span>
             </button>
-            <button onClick={() => openExportModal('dashboard')} disabled={!canExportResults} className="hidden bg-[#ca080b] px-4 py-2 rounded-md hover:bg-red-700 transition-colors shadow-sm font-semibold disabled:bg-slate-400 disabled:cursor-not-allowed md:block">
-              Export PDF
+            <button
+              type="button"
+              onClick={() => openExportModal('dashboard')}
+              className="flex items-center gap-1.5 bg-[#ca080b] px-3.5 py-2 rounded-md hover:bg-red-700 transition-colors shadow-sm font-semibold text-xs sm:text-sm text-white"
+              title="Export A4 printable PDF report"
+            >
+              <FileText size={16} />
+              <span className="hidden sm:inline">Export PDF</span>
+              <span className="sm:hidden">PDF</span>
             </button>
-            <button onClick={() => openExportModal('research')} disabled={!canExportResults} className="hidden border border-white/30 bg-white/10 px-4 py-2 rounded-md hover:bg-white/20 transition-colors shadow-sm font-semibold disabled:bg-slate-400 disabled:border-transparent disabled:cursor-not-allowed lg:block">
-              Research PDF
+            <button
+              type="button"
+              onClick={() => openExportModal('research')}
+              className="hidden sm:flex items-center gap-1.5 border border-white/30 bg-white/10 px-3.5 py-2 rounded-md hover:bg-white/20 transition-colors shadow-sm font-semibold text-xs sm:text-sm text-white"
+              title="Export MCS academic research PDF report"
+            >
+              <BookOpen size={16} />
+              <span>Research PDF</span>
             </button>
           </nav>
         </div>
@@ -173,6 +190,7 @@ const App: React.FC = () => {
             visibleBrandMap={dashboard.visibleBrandMap}
             currentReliability={dashboard.currentReliability}
             viewMode={dashboard.viewMode}
+            onExportResearchPdf={() => openExportModal('research')}
           />
         </div>
       </main>
