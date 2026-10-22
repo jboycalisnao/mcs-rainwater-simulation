@@ -37,20 +37,8 @@ export const useDashboardController = () => {
   const [activeParams, setActiveParams] = useState<MonthlyParameters[]>(DEFAULT_MONTHLY_PARAMS);
   const [genYears, setGenYears] = useState(10);
   const [genSeed, setGenSeed] = useState(() => Math.floor(Math.random() * 900000) + 100000);
-  const [rainfallEnsemble, setRainfallEnsemble] = useState<RainfallDataRow[][]>(() => {
-    try {
-      return RainfallEngine.generateEnsemble(DEFAULT_MONTHLY_PARAMS, 10, 543210, DEFAULT_ENSEMBLE_RUNS);
-    } catch {
-      return [];
-    }
-  });
-  const [rainfallData, setRainfallData] = useState<RainfallDataRow[]>(() => {
-    try {
-      return RainfallEngine.generateEnsemble(DEFAULT_MONTHLY_PARAMS, 10, 543210, 1)[0] ?? [];
-    } catch {
-      return [];
-    }
-  });
+  const [rainfallEnsemble, setRainfallEnsemble] = useState<RainfallDataRow[][]>([]);
+  const [rainfallData, setRainfallData] = useState<RainfallDataRow[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [inflowConfig, setInflowConfig] = useState<InflowConfig>({
     buildings: DEFAULT_BUILDINGS,
